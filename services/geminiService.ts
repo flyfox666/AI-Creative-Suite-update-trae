@@ -1,0 +1,301 @@
+import { GoogleGenAI, Modality } from "@google/genai";
+import { parseStoryboard } from "../utils/parser";
+import { Scene, StoryboardResult } from '../types';
+
+if (!process.env.API_KEY) {
+    throw new Error("API_KEY environment variable not set");
+}
+
+const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+
+const getSystemPrompt = (duration: number, sceneCount: number): string => `
+You are a top-tier Director of Photography (DP), Storyboard Engineer, and Visual Reverse-Analyst, specializing in AI video generation. Your task is to generate a multi-scene, highly detailed prompt sequence based on user input.
+
+**CRITICAL REQUIREMENT: You MUST generate exactly ${sceneCount} scenes. No more, no less.**
+
+**RULES:**
+- Each scene should have a duration of approximately ${Math.round(duration / sceneCount)} seconds.
+- All fields must use "Key: Value" format.
+- Prohibit long, prosaic sentences outside of "Narrative/Intent".
+- Total duration must be ${duration} seconds.
+- Each scene must have 3-4 Action Cues (one every 2-4 seconds).
+- Maintain consistency in Subject, Environment, and Grade across scenes.
+
+**OUTPUT STRUCTURE TEMPLATE:**
+
+Sequence Overview: <Concept or Title>
+
+Sequence Coherence
+Overall Narrative Arc: <Setup–Climax–Resolution>
+Aesthetic Persistent: <Unified visual tone>
+Continuity Cues: <Scene connection logic>
+Total Duration Target: ${duration}s
+
+Scene 1: <Scene Name>
+Scene Duration: <~${Math.round(duration / sceneCount)} Seconds>
+Subject / Scene Settings
+Narrative/Intent: <Theme>
+Subject: <Subject description>
+Key Features: <Action/Features>
+Environment: <Environment>
+Atmosphere/Weather: <Time, weather>
+Lighting: <Lighting description>
+Grade: <Color grading>
+Cinematography & Action
+Camera: <Camera perspective>
+Move: <Camera movement>
+Lens/Focus: <Lens and depth of field>
+Structure - <~${Math.round(duration / sceneCount)} Second Version>
+Action Cues:
+0.0s: <Opening action>
+[T1]s: <Action 1>
+[T2]s: <Action 2>
+[N.0s]: <Closing action>
+
+(Repeat for all ${sceneCount} scenes.)
+`;
+
+export const generateImageForScene = async (prompt: string, previousImageUrl: string | undefined, aspectRatio: string): Promise<string> => {
+    try {
+        const ai = getAiClient();
+        const textPart = { text: "" };
+        const parts: any[] = [];
+
+        if (previousImageUrl) {
+            const match = previousImageUrl.match(/^data:(image\/.+);base64,(.+)$/);
+            if (!match) {
+                throw new Error("Invalid previous image data URL format for coherence.");
+            }
+            const mimeType = match[1];
+            const data = match[2];
+            const imagePart = {
+                inlineData: {
+                    mimeType: mimeType,
+                    data: data,
+                },
+            };
+            parts.push(imagePart);
+            textPart.text = `Given the previous frame, generate the next logical cinematic still for the following scene description. Maintain character, style, and environmental consistency. Scene: ${prompt}`;
+        } else {
+            // First image
+            textPart.text = `cinematic still, photorealistic, ${aspectRatio} aspect ratio, high detail, from a video described as: ${prompt}`;
+        }
+        parts.push(textPart);
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash-image',
+            contents: { parts },
+            config: {
+                responseModalities: [Modality.IMAGE],
+            },
+        });
+
+        const imagePart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (imagePart && imagePart.inlineData) {
+            const base64ImageBytes: string = imagePart.inlineData.data;
+            const mimeType = imagePart.inlineData.mimeType;
+            return `data:${mimeType};base64,${base64ImageBytes}`;
+        }
+        
+        const finishReason = response.candidates?.[0]?.finishReason;
+        const responseText = response.text;
+        
+        let errorMessage = "No image was generated for the scene.";
+        if (finishReason === 'SAFETY') {
+            errorMessage = `Image generation failed due to safety policies. Your prompt may need to be revised.`;
+        } else if (responseText && responseText.trim()) {
+            errorMessage = `Image generation failed. The model responded with: "${responseText.trim()}"`;
+        } else if (finishReason) {
+            errorMessage = `Image generation failed. Reason: ${finishReason}.`;
+        } else if (!response.candidates || response.candidates.length === 0) {
+            errorMessage = "Image generation failed because the model returned no response. This could be due to a network issue, an invalid API key, or a billing problem.";
+        }
+        
+        throw new Error(errorMessage);
+
+    } catch (error) {
+        console.error("Error generating image:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("An unknown error occurred while generating the image.");
+    }
+};
+
+
+export const generateStoryboardAndImages = async (
+    userInput: string, 
+    duration: number, 
+    sceneCount: number, 
+    isCoherent: boolean, 
+    aspectRatio: string, 
+    referenceImage: { base64: string; mimeType: string } | null
+): Promise<StoryboardResult> => {
+    const ai = getAiClient();
+    
+    // 1. If there's a reference image, analyze it to enrich the user prompt
+    let finalUserInput = userInput;
+    if (referenceImage) {
+        try {
+            const imageAnalysis = await analyzeImage(referenceImage.base64, referenceImage.mimeType, 'Describe this image in detail for a film director, focusing on subject, environment, lighting, and mood.');
+            finalUserInput = `USER IDEA: "${userInput}"\n\nVISUAL CONTEXT FROM REFERENCE IMAGE: "${imageAnalysis}"\n\nCombine the user's idea with the visual context to create the storyboard. The reference image sets the style and content for the first scene.`;
+        } catch (error) {
+            console.warn("Could not analyze reference image, proceeding with text prompt only.", error);
+        }
+    }
+    
+    // 2. Generate the full structured storyboard text
+    let fullResponseText;
+    try {
+        const systemPrompt = getSystemPrompt(duration, sceneCount);
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-pro',
+            contents: `${systemPrompt}\n\nHere is the user's idea:\n\n'${finalUserInput}'`,
+        });
+        fullResponseText = response.text;
+    } catch (error) {
+        console.error("Error generating storyboard text:", error);
+        throw new Error("Failed to generate storyboard from Gemini API.");
+    }
+    
+    // 3. Parse the text to extract scenes and the copy-ready prompt
+    const { scenes: parsedScenes, copyReadyPrompt } = parseStoryboard(fullResponseText);
+    if (parsedScenes.length === 0) {
+        throw new Error("Could not parse any scenes from the generated text. The model might have returned an unexpected format.");
+    }
+
+    // 4. Generate an image for each scene SEQUENTIALLY for coherence
+    const scenesWithImages: Scene[] = [];
+    let previousImageUrl: string | undefined = undefined;
+
+    if (referenceImage) {
+        previousImageUrl = `data:${referenceImage.mimeType};base64,${referenceImage.base64}`;
+    }
+
+    for (let i = 0; i < parsedScenes.length; i++) {
+        const scene = parsedScenes[i];
+        let imageUrl: string | undefined;
+
+        // If it's the first scene and we have a reference image, use it directly.
+        if (i === 0 && referenceImage) {
+            imageUrl = `data:${referenceImage.mimeType};base64,${referenceImage.base64}`;
+        } else {
+            // Otherwise, generate the image. Use the previous image if coherence is on.
+            const prevImgForGen = isCoherent ? previousImageUrl : undefined;
+            imageUrl = await generateImageForScene(scene.description, prevImgForGen, aspectRatio);
+        }
+        
+        scenesWithImages.push({
+            ...scene,
+            imageUrl: imageUrl,
+        });
+        
+        // The current image becomes the next 'previous' image.
+        previousImageUrl = imageUrl;
+    }
+
+    return {
+        copyReadyPrompt,
+        scenes: scenesWithImages,
+    };
+};
+
+// --- New Service Functions ---
+
+// Image Studio: Generate
+export const generateImageWithImagen = async (prompt: string, aspectRatio: '1:1' | '16:9' | '9:16' | '4:3' | '3:4'): Promise<string> => {
+    const ai = getAiClient();
+    const response = await ai.models.generateImages({
+        model: 'imagen-4.0-generate-001',
+        prompt: prompt,
+        config: {
+            numberOfImages: 1,
+            outputMimeType: 'image/png',
+            aspectRatio: aspectRatio,
+        },
+    });
+
+    const base64ImageBytes = response.generatedImages[0].image.imageBytes;
+    return `data:image/png;base64,${base64ImageBytes}`;
+};
+
+// Image Studio: Edit
+export const editImage = async (base64ImageData: string, mimeType: string, prompt: string): Promise<string> => {
+    const ai = getAiClient();
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: {
+            parts: [
+                { inlineData: { data: base64ImageData, mimeType: mimeType } },
+                { text: prompt },
+            ],
+        },
+        config: {
+            responseModalities: [Modality.IMAGE],
+        },
+    });
+
+    const imagePart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+
+    if (imagePart && imagePart.inlineData) {
+        const base64ImageBytes: string = imagePart.inlineData.data;
+        const mimeType = imagePart.inlineData.mimeType;
+        return `data:${mimeType};base64,${base64ImageBytes}`;
+    }
+
+    // Handle cases where no image is returned
+    const finishReason = response.candidates?.[0]?.finishReason;
+    const responseText = response.text;
+    
+    let errorMessage = "Image editing failed to produce an image.";
+    if (finishReason === 'SAFETY') {
+        errorMessage = `Image editing failed due to safety policies. Your prompt may need to be revised.`;
+    } else if (responseText && responseText.trim()) {
+        errorMessage = `Image editing failed. The model responded with: "${responseText.trim()}"`;
+    } else if (finishReason) {
+        errorMessage = `Image editing failed. Reason: ${finishReason}.`;
+    } else if (!response.candidates || response.candidates.length === 0) {
+        errorMessage = "Image editing failed because the model returned no response. This could be due to a network issue, an invalid API key, or a billing problem.";
+    }
+    
+    throw new Error(errorMessage);
+};
+
+// Media Analyzer: Image
+export const analyzeImage = async (base64ImageData: string, mimeType: string, prompt: string): Promise<string> => {
+    const ai = getAiClient();
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: {
+            parts: [
+                { text: prompt },
+                { inlineData: { data: base64ImageData, mimeType: mimeType } },
+            ]
+        }
+    });
+    return response.text;
+};
+
+// Media Analyzer: Video (Replication Mode)
+export const analyzeVideo = async (base64VideoData: string, mimeType: string, useThinkingMode: boolean): Promise<string> => {
+    const ai = getAiClient();
+    const videoAnalysisSystemPrompt = `You are a top-tier Director of Photography and Visual Reverse-Analyst. Analyze the provided video and generate a detailed, structured storyboard script based on its content. Deconstruct its [Style], [Lighting], [Camera Movement], and [Action Rhythm] to create a replication prompt. Follow the multi-scene storyboard format provided in previous instructions.
+
+**CRITICAL INSTRUCTION:** Your entire response must ONLY be the structured storyboard script, starting directly with "Sequence Overview:". Do not add any conversational introductions, summaries, or explanations before or after the script.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: {
+            parts: [
+                { text: 'Analyze this video and generate a replication storyboard.' },
+                { inlineData: { data: base64VideoData, mimeType: mimeType } },
+            ]
+        },
+        config: {
+            systemInstruction: videoAnalysisSystemPrompt,
+            ...(useThinkingMode && { thinkingConfig: { thinkingBudget: 32768 } })
+        }
+    });
+    return response.text;
+};
