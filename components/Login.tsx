@@ -22,7 +22,7 @@ const Login: React.FC = () => {
     const success = await login(email);
     
     if (!success) {
-      setError('Invalid email. Please use one of the test accounts.');
+      setError('An error occurred during login. Please try again.');
       setIsLoading(false);
     }
     // On success, the App component will automatically re-render the main content.
@@ -75,11 +75,11 @@ const Login: React.FC = () => {
         </form>
 
         <div className="mt-6 p-4 bg-gray-900 border border-gray-700 rounded-lg text-sm">
-            <h4 className="font-semibold text-gray-300">Test Account (No Password Needed):</h4>
-            <ul className="mt-2 list-disc list-inside text-gray-400 space-y-1">
-                <li><strong className="text-cyan-400">FREE Plan:</strong> <code className="bg-gray-700 p-1 rounded">free@example.com</code></li>
-            </ul>
-            <p className="mt-3 text-xs text-gray-500">Log in with the free account and use the 'Upgrade' button to test the PRO access code functionality.</p>
+            <h4 className="font-semibold text-gray-300">Getting Started:</h4>
+            <p className="mt-2 text-gray-400">
+                Enter any email to start with a free account. Your credits and plan will be saved in this browser.
+            </p>
+            <p className="mt-3 text-xs text-gray-500">You can use the 'Upgrade' button inside the app to test the PRO access code functionality.</p>
         </div>
       </div>
     </div>

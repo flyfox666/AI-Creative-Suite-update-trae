@@ -2,12 +2,9 @@ import { User } from '../types';
 
 // This is a mock database of users. In a real application, this would be
 // replaced with API calls to a backend authentication service.
+// The default free user is now created dynamically in UserContext, so we can keep this empty.
 const mockUsers: User[] = [
-  {
-    email: 'free@example.com',
-    plan: 'free',
-    credits: 200,
-  },
+  
 ];
 
 /**

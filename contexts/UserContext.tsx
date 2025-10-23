@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { User } from '../types';
 import { findUserByEmail, verifyProAccessCode } from '../auth/mockUsers';
 
@@ -15,6 +15,8 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+const USER_STORAGE_KEY = 'ai-creative-suite-user';
+
 // Default user states. We create copies to avoid mutation.
 const getFreeUserTemplate = (email = 'test@user.com'): User => ({
   email: email,
@@ -28,9 +30,35 @@ const getProUserTemplate = (email = 'pro@example.com'): User => ({
   credits: 1000, // Pro users get more credits
 });
 
+const getInitialUser = (): User => {
+    try {
+        const savedUser = window.localStorage.getItem(USER_STORAGE_KEY);
+        if (savedUser) {
+            // Add validation here if user object shape changes over time
+            return JSON.parse(savedUser);
+        }
+    } catch (error) {
+        console.error("Failed to read user from localStorage", error);
+        // If parsing fails, clear the corrupted data
+        window.localStorage.removeItem(USER_STORAGE_KEY);
+    }
+    // Return a default free user if nothing is saved or if there was an error
+    return getFreeUserTemplate();
+};
+
+
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User>(getFreeUserTemplate());
+    const [user, setUser] = useState<User>(getInitialUser);
     const [isProModalOpen, setIsProModalOpen] = useState(false);
+
+    // Effect to save user state to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+        } catch (error) {
+            console.error("Failed to save user to localStorage", error);
+        }
+    }, [user]);
 
     const spendCredits = (amount: number) => {
         setUser(currentUser => {
@@ -47,7 +75,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setUser(foundUser);
             return true;
         }
-        return false;
+        // For this demo, if user is not found, we create a new free user
+        // In a real app, this might show an error.
+        setUser(getFreeUserTemplate(email));
+        return true;
     };
 
     const switchToPro = async (accessCode: string): Promise<boolean> => {

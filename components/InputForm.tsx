@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ProBadge from './ProBadge';
 import { useLocalization } from '../contexts/LocalizationContext';
@@ -134,18 +133,18 @@ const InputForm: React.FC<InputFormProps> = ({
                     </button>
                 </div>
             ) : (
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md">
+                <label htmlFor="file-upload" className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md cursor-pointer hover:border-purple-500 transition-colors duration-200">
                     <div className="space-y-1 text-center">
                         <UploadIcon className="mx-auto h-12 w-12 text-gray-500"/>
-                        <div className="flex text-sm text-gray-500">
-                            <label htmlFor="file-upload" className="relative cursor-pointer bg-gray-800 rounded-md font-medium text-purple-400 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 focus-within:ring-purple-500">
-                                <span>{t('storyboard.form.uploadImageLabel')}</span>
-                                <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
-                            </label>
+                        <div className="flex justify-center text-sm text-gray-500">
+                            <span className="font-medium text-purple-400">
+                                {t('storyboard.form.uploadImageLabel')}
+                            </span>
                         </div>
                         <p className="text-xs text-gray-500">{t('storyboard.form.uploadHint')}</p>
                     </div>
-                </div>
+                    <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
+                </label>
             )}
         </div>
       </div>
