@@ -61,7 +61,15 @@
       "aspectRatioPortrait": "9:16 Portrait",
       "submitHint": "Press Ctrl+Enter or Cmd+Enter to submit",
       "generatingButton": "Generating...",
-      "generateButton": "Generate Storyboard"
+      "generateButton": "Generate Storyboard",
+      "refImageModeTitle": "Reference Image Mode",
+      "refImageModeHint": "How should we use these images?",
+      "refImageModeContextualTitle": "Contextual Inspiration",
+      "refImageModeContextualHint": "Analyze all images for context, use first image as visual seed for Scene 1.",
+      "refImageModeCombineTitle": "Combine Images",
+      "refImageModeCombineHint": "Merge all images into a new, single image for Scene 1. (+{{cost}} credits)",
+      "refImageModeCombineCostPro": "20",
+      "refImageModeCombineCostFree": "40"
     },
     "results": {
       "framesTitle": "Generated Scene Frames",
@@ -86,7 +94,8 @@
       "errorRegenCredits": "Not enough credits to regenerate. You need {{creditCost}} credits.",
       "errorRegenFailed": "Failed to regenerate image for Scene {{index}}: {{errorMessage}}",
       "errorUploadFailed": "Failed to use uploaded image for Scene {{index}}: {{errorMessage}}",
-      "loadingMessage": "Generating storyboard and scene images... This may take a moment."
+      "loadingMessage": "Generating storyboard and scene images... This may take a moment.",
+      "errorCombine": "Failed to combine reference images: {{errorMessage}}"
     },
     "imageModal": {
       "closeAria": "Close",
@@ -94,39 +103,34 @@
     }
   },
   "imageStudio": {
-    "generateTab": "Generate",
-    "editTab": "Edit",
-    "generateTitle": "Describe the image you want to create",
-    "editTitle": "Describe the edit you want to make",
-    "generatePlaceholder": "e.g., A majestic lion with a crown of stars, cyberpunk style.",
-    "aspectRatioLabel": "Aspect Ratio",
-    "aspectRatioSquare": "1:1 (Square)",
-    "aspectRatioLandscape": "16:9 (Landscape)",
-    "aspectRatioPortrait": "9:16 (Portrait)",
-    "aspectRatioStandard": "4:3 (Standard)",
-    "aspectRatioVertical": "3:4 (Vertical)",
-    "freeGenerationsLeft": "You have {{count}} free generations remaining.",
-    "freeGenerationsLimit": "Free generation limit reached.",
-    "generateButton": "Generate Image ({{cost}} Credits)",
-    "editPlaceholder": "e.g., Add a retro film grain filter.",
-    "uploadLabel": "Upload Image to Edit",
-    "freeEditsLeft": "You have {{count}} free edits remaining.",
-    "freeEditsLimit": "Free edit limit reached.",
-    "editButton": "Edit Image ({{cost}} Credits)",
-    "loadingGenerate": "Generating your masterpiece...",
-    "loadingEdit": "Applying your edits...",
-    "errorPrompt": "Please enter a prompt.",
-    "errorEditInstruction": "Please enter an editing instruction.",
-    "errorUpload": "Please upload an image to edit.",
-    "errorCredits": "Not enough credits. This action costs {{cost}} credits, but you only have {{userCredits}}.",
-    "errorFreeGenerations": "You have reached the free limit of {{limit}} image generations. Upgrade to PRO for unlimited generations.",
-    "errorFreeEdits": "You have reached the free limit of {{limit}} image edits. Upgrade to PRO for unlimited edits.",
-    "errorProcessImage": "Could not process image for editing.",
-    "resultGeneratedTitle": "Generated Image",
-    "resultOriginalTitle": "Original",
-    "resultEditedTitle": "Edited",
+    "introMessage": "Hello! I'm your creative partner. Here's how to use the Image Studio:\n\n1. **Generate**: Just type a prompt to create a new image from scratch.\n2. **Edit**: Upload **one** image and type instructions to modify it.\n3. **Combine**: Upload **multiple** images and describe how to merge them.\n\n**Credit Costs per Action:**\n- **Generate**: {{gen_pro}} (PRO) / {{gen_free}} (Free)\n- **Edit**: {{edit_pro}} (PRO) / {{edit_free}} (Free)\n- **Combine**: {{combine_pro}} (PRO) / {{combine_free}} (Free)",
+    "placeholder": "Describe an image or type an edit instruction...",
+    "sendButtonAria": "Send message",
+    "uploadButtonAria": "Upload images",
+    "removeImageAria": "Remove image",
+    "userLabel": "You",
+    "aiLabel": "AI",
     "useInStoryboardButton": "Use in Storyboard",
-    "editImageButton": "Edit Image"
+    "clearChatButton": "Clear Chat",
+    "clearChatTooltip": "Start a new conversation",
+    "errorNoPromptForImages": "Please add a prompt to describe how to edit or combine your image(s).",
+    "errorCredits": "Not enough credits. This action costs {{cost}} credits, but you only have {{userCredits}}.",
+    "errorImageLimit": "You can upload a maximum of {{max}} images.",
+    "errorFileProcess": "Failed to process image file.",
+    "cost": {
+      "generate": {
+        "pro": 10,
+        "free": 25
+      },
+      "edit": {
+        "pro": 2,
+        "free": 5
+      },
+      "combine": {
+        "pro": 15,
+        "free": 35
+      }
+    }
   },
   "mediaAnalyzer": {
     "imageTab": "Image Analysis",
@@ -164,11 +168,10 @@
       "feature2": "per Storyboard",
       "feature2Value": "Max 3 Scenes",
       "feature2Cost": "(10 credits/scene)",
-      "feature3": "total",
-      "feature3Value": "3 Image Generations",
-      "feature3Cost": "(40 credits/image)",
-      "feature4Value": "3 Image Edits",
-      "feature4Cost": "(25 credits/edit)",
+      "feature_image_studio_title": "Image Studio (Pay-per-use)",
+      "feature_image_studio_generate": "Image Generation ({{cost}} credits/image)",
+      "feature_image_studio_edit": "Image Editing ({{cost}} credits/edit)",
+      "feature_image_studio_combine": "Image Combining ({{cost}} credits/combine)",
       "feature5": "Pay-per-use Advanced Features:",
       "feature5_1": "Scene Coherence",
       "feature5_1_cost": "(+5 Credits/Scene)",
@@ -188,8 +191,10 @@
       "feature1Value": "1,000",
       "feature2": "& Unlimited Generations/Edits",
       "feature2Value": "Increased Limits",
-      "feature3": "on all actions (up to 50% off)",
-      "feature3Value": "Discounted Rates",
+      "feature3": "Heavily discounted rates on all actions:",
+      "feature_image_studio_generate": "Image Generation ({{cost}} credits/image)",
+      "feature_image_studio_edit": "Image Editing ({{cost}} credits/edit)",
+      "feature_image_studio_combine": "Image Combining ({{cost}} credits/combine)",
       "feature4": "All Advanced Features Included:",
       "feature4_detail": "Coherence, Enhanced Analysis, Downloads, and Editing",
       "buttonText": "Upgrade to PRO",

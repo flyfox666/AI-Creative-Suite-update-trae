@@ -61,7 +61,15 @@
       "aspectRatioPortrait": "9:16 纵向",
       "submitHint": "按 Ctrl+Enter 或 Cmd+Enter 提交",
       "generatingButton": "生成中...",
-      "generateButton": "生成故事板"
+      "generateButton": "生成故事板",
+      "refImageModeTitle": "参考图像模式",
+      "refImageModeHint": "我们应该如何使用这些图片？",
+      "refImageModeContextualTitle": "上下文灵感",
+      "refImageModeContextualHint": "分析所有图像以获取上下文，使用第一张图像作为场景1的视觉种子。",
+      "refImageModeCombineTitle": "合并图像",
+      "refImageModeCombineHint": "将所有图像合并成一张新的、单一的图像用于场景1。(+{{cost}} 积分)",
+      "refImageModeCombineCostPro": "20",
+      "refImageModeCombineCostFree": "40"
     },
     "results": {
       "framesTitle": "生成的场景画面",
@@ -86,7 +94,8 @@
       "errorRegenCredits": "积分不足，无法重新生成。您需要 {{creditCost}} 积分。",
       "errorRegenFailed": "为场景 {{index}} 重新生成图像失败：{{errorMessage}}",
       "errorUploadFailed": "为场景 {{index}} 使用上传的图像失败：{{errorMessage}}",
-      "loadingMessage": "正在生成故事板和场景图像... 这可能需要一些时间。"
+      "loadingMessage": "正在生成故事板和场景图像... 这可能需要一些时间。",
+      "errorCombine": "合并参考图像失败：{{errorMessage}}"
     },
     "imageModal": {
       "closeAria": "关闭",
@@ -94,39 +103,34 @@
     }
   },
   "imageStudio": {
-    "generateTab": "生成",
-    "editTab": "编辑",
-    "generateTitle": "描述您想创建的图像",
-    "editTitle": "描述您想做的编辑",
-    "generatePlaceholder": "例如：一只戴着星冠的雄伟狮子，赛博朋克风格。",
-    "aspectRatioLabel": "宽高比",
-    "aspectRatioSquare": "1:1（方形）",
-    "aspectRatioLandscape": "16:9（横向）",
-    "aspectRatioPortrait": "9:16（纵向）",
-    "aspectRatioStandard": "4:3（标准）",
-    "aspectRatioVertical": "3:4（垂直）",
-    "freeGenerationsLeft": "您还剩 {{count}} 次免费生成次数。",
-    "freeGenerationsLimit": "已达到免费生成次数上限。",
-    "generateButton": "生成图像（{{cost}} 积分）",
-    "editPlaceholder": "例如：添加复古胶片颗粒滤镜。",
-    "uploadLabel": "上传要编辑的图像",
-    "freeEditsLeft": "您还剩 {{count}} 次免费编辑次数。",
-    "freeEditsLimit": "已达到免费编辑次数上限。",
-    "editButton": "编辑图像（{{cost}} 积分）",
-    "loadingGenerate": "正在生成您的杰作...",
-    "loadingEdit": "正在应用您的编辑...",
-    "errorPrompt": "请输入一个提示。",
-    "errorEditInstruction": "请输入编辑指令。",
-    "errorUpload": "请上传一张图片进行编辑。",
-    "errorCredits": "积分不足。此操作需要 {{cost}} 积分，但您只有 {{userCredits}}。",
-    "errorFreeGenerations": "您已达到 {{limit}} 次免费图像生成上限。升级到 PRO 以无限次生成。",
-    "errorFreeEdits": "您已达到 {{limit}} 次免费图像编辑上限。升级到 PRO 以无限次编辑。",
-    "errorProcessImage": "无法处理图像以进行编辑。",
-    "resultGeneratedTitle": "生成的图像",
-    "resultOriginalTitle": "原始图像",
-    "resultEditedTitle": "编辑后的图像",
+    "introMessage": "您好！我是您的创意伙伴。以下是图像工作室的使用方法：\n\n1. **生成**：只需输入提示即可从头开始创建新图像。\n2. **编辑**：上传**一张**图片并输入说明进行修改。\n3. **合并**：上传**多张**图片并描述如何将它们融合。\n\n**各项操作的积分成本：**\n- **生成**: {{gen_pro}} (PRO) / {{gen_free}} (免费)\n- **编辑**: {{edit_pro}} (PRO) / {{edit_free}} (免费)\n- **合并**: {{combine_pro}} (PRO) / {{combine_free}} (免费)",
+    "placeholder": "描述图像或输入编辑指令...",
+    "sendButtonAria": "发送消息",
+    "uploadButtonAria": "上传图片",
+    "removeImageAria": "移除图片",
+    "userLabel": "您",
+    "aiLabel": "AI",
     "useInStoryboardButton": "在故事板中使用",
-    "editImageButton": "编辑图像"
+    "clearChatButton": "清空对话",
+    "clearChatTooltip": "开始新的对话",
+    "errorNoPromptForImages": "请添加提示来描述如何编辑或合并您的图片。",
+    "errorCredits": "积分不足。此操作需要 {{cost}} 积分，但您只有 {{userCredits}}。",
+    "errorImageLimit": "您最多可以上传 {{max}} 张图片。",
+    "errorFileProcess": "处理图像文件失败。",
+    "cost": {
+      "generate": {
+        "pro": 10,
+        "free": 25
+      },
+      "edit": {
+        "pro": 2,
+        "free": 5
+      },
+      "combine": {
+        "pro": 15,
+        "free": 35
+      }
+    }
   },
   "mediaAnalyzer": {
     "imageTab": "图像分析",
@@ -164,11 +168,10 @@
       "feature2": "每个故事板",
       "feature2Value": "最多 3 个场景",
       "feature2Cost": "（10 积分/场景）",
-      "feature3": "总计",
-      "feature3Value": "3 次图像生成",
-      "feature3Cost": "（40 积分/图像）",
-      "feature4Value": "3 次图像编辑",
-      "feature4Cost": "（25 积分/编辑）",
+      "feature_image_studio_title": "图像工作室 (按次付费)",
+      "feature_image_studio_generate": "图像生成 ({{cost}} 积分/张)",
+      "feature_image_studio_edit": "图像编辑 ({{cost}} 积分/次)",
+      "feature_image_studio_combine": "图像合并 ({{cost}} 积分/次)",
       "feature5": "按使用付费的高级功能：",
       "feature5_1": "场景连贯性",
       "feature5_1_cost": "（+5 积分/场景）",
@@ -188,8 +191,10 @@
       "feature1Value": "1,000",
       "feature2": "和无限生成/编辑",
       "feature2Value": "增加的限制",
-      "feature3": "所有操作（高达 50% 折扣）",
-      "feature3Value": "折扣费率",
+      "feature3": "所有操作均享大幅折扣：",
+      "feature_image_studio_generate": "图像生成 ({{cost}} 积分/张)",
+      "feature_image_studio_edit": "图像编辑 ({{cost}} 积分/次)",
+      "feature_image_studio_combine": "图像合并 ({{cost}} 积分/次)",
       "feature4": "包含所有高级功能：",
       "feature4_detail": "连贯性、增强分析、下载和编辑",
       "buttonText": "升级到 PRO",

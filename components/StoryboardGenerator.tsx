@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { generateStoryboardAndImages, generateImageForScene } from '../services/geminiService';
+import { generateStoryboardAndImages, generateImageForScene, combineImages } from '../services/geminiService';
 import { StoryboardResult, Scene } from '../types';
 import InputForm from './InputForm';
 import ResultsDisplay from './ResultsDisplay';
@@ -17,6 +17,8 @@ interface StoryboardGeneratorProps {
   onInitialDataUsed: () => void;
 }
 
+type ReferenceImageMode = 'contextual' | 'combine';
+
 const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, initialImage, onInitialDataUsed }) => {
   const { user, spendCredits } = useUser();
   const { t } = useLocalization();
@@ -31,6 +33,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
   const [modalImage, setModalImage] = useState<{ url: string; sceneNumber: number } | null>(null);
   const [regeneratingScenes, setRegeneratingScenes] = useState<Set<number>>(new Set());
   const [referenceImages, setReferenceImages] = useState<{url: string, base64: string, mimeType: string}[]>([]);
+  const [referenceImageMode, setReferenceImageMode] = useState<ReferenceImageMode>('contextual');
 
   const isProUser = user.plan === 'pro';
 
@@ -113,7 +116,12 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
         imageCost = (referenceImages.length - 1) * EXTRA_IMAGE_COST;
     }
     
-    const totalCreditCost = storyboardCost + imageCost;
+    let combineCost = 0;
+    if (referenceImageMode === 'combine' && referenceImages.length > 1) {
+        combineCost = isProUser ? 20 : 40;
+    }
+
+    const totalCreditCost = storyboardCost + imageCost + combineCost;
     
     if (user.credits < totalCreditCost) {
         setError(t('storyboard.generator.errorNotEnoughCredits', { totalCreditCost, userCredits: user.credits }));
@@ -125,7 +133,28 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
     setStoryboardResult(null);
 
     try {
-      const result = await generateStoryboardAndImages(userInput, parsedDuration, parsedSceneCount, isCoherent, aspectRatio, referenceImages);
+      let finalReferenceImages = referenceImages;
+
+      if (referenceImageMode === 'combine' && referenceImages.length > 1) {
+          try {
+              const combinedImage = await combineImages(
+                  referenceImages, 
+                  'Combine the key elements from these images into a single, coherent cinematic scene.'
+              );
+              const combinedImageUrl = `data:${combinedImage.mimeType};base64,${combinedImage.base64}`;
+              
+              finalReferenceImages = [{
+                  url: combinedImageUrl,
+                  base64: combinedImage.base64,
+                  mimeType: combinedImage.mimeType,
+              }];
+          } catch (err) {
+              const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+              throw new Error(t('storyboard.generator.errorCombine', { errorMessage }));
+          }
+      }
+
+      const result = await generateStoryboardAndImages(userInput, parsedDuration, parsedSceneCount, isCoherent, aspectRatio, finalReferenceImages);
       spendCredits(totalCreditCost);
       setStoryboardResult(result);
     } catch (err) {
@@ -134,7 +163,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
     } finally {
       setIsLoading(false);
     }
-  }, [userInput, duration, sceneCount, isCoherent, aspectRatio, referenceImages, user, spendCredits, isProUser, t]);
+  }, [userInput, duration, sceneCount, isCoherent, aspectRatio, referenceImages, referenceImageMode, user, spendCredits, isProUser, t]);
 
   const handleImageClick = (url: string, sceneNumber: number) => {
     if (url) {
@@ -247,6 +276,8 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
           onSubmit={handleSubmit}
           isLoading={isLoading}
           isProUser={isProUser}
+          referenceImageMode={referenceImageMode}
+          setReferenceImageMode={setReferenceImageMode}
         />
       </div>
 

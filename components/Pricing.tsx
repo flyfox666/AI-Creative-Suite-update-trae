@@ -21,6 +21,7 @@ const Pricing: React.FC = () => {
     const { user, openProModal } = useUser();
     const { t } = useLocalization();
     const isPro = user.plan === 'pro';
+    const costs = t('imageStudio.cost', {}) as any;
 
     const handleUpgrade = () => {
         if (isPro) return;
@@ -55,13 +56,15 @@ const Pricing: React.FC = () => {
                             <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
                             <span><span className="font-semibold text-white">{t('pricing.freePlan.feature2Value')}</span> {t('pricing.freePlan.feature2')} {t('pricing.freePlan.feature2Cost')}</span>
                         </li>
-                        <li className="flex items-start">
-                            <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
-                            <span><span className="font-semibold text-white">{t('pricing.freePlan.feature3Value')}</span> {t('pricing.freePlan.feature3')} {t('pricing.freePlan.feature3Cost')}</span>
-                        </li>
                          <li className="flex items-start">
                             <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
-                            <span><span className="font-semibold text-white">{t('pricing.freePlan.feature4Value')}</span> {t('pricing.freePlan.feature3')} {t('pricing.freePlan.feature4Cost')}</span>
+                            <span>{t('pricing.freePlan.feature_image_studio_title')}
+                                <ul className="list-disc list-inside text-gray-400 mt-1 pl-2 text-sm">
+                                    <li>{t('pricing.freePlan.feature_image_studio_generate', {cost: costs.generate.free })}</li>
+                                    <li>{t('pricing.freePlan.feature_image_studio_edit', {cost: costs.edit.free })}</li>
+                                    <li>{t('pricing.freePlan.feature_image_studio_combine', {cost: costs.combine.free })}</li>
+                                </ul>
+                            </span>
                         </li>
                         <li className="flex items-start">
                             <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
@@ -108,7 +111,13 @@ const Pricing: React.FC = () => {
                         </li>
                         <li className="flex items-start">
                             <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
-                             <span><span className="font-semibold text-white">{t('pricing.proPlan.feature3Value')}</span> {t('pricing.proPlan.feature3')}</span>
+                             <span><span className="font-semibold text-white">{t('pricing.proPlan.feature3')}</span>
+                                <ul className="list-disc list-inside text-gray-400 mt-1 pl-2 text-sm">
+                                    <li>{t('pricing.proPlan.feature_image_studio_generate', {cost: costs.generate.pro })}</li>
+                                    <li>{t('pricing.proPlan.feature_image_studio_edit', {cost: costs.edit.pro })}</li>
+                                    <li>{t('pricing.proPlan.feature_image_studio_combine', {cost: costs.combine.pro })}</li>
+                                </ul>
+                             </span>
                         </li>
                          <li className="flex items-start">
                             <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />

@@ -213,21 +213,92 @@ export const generateStoryboardAndImages = async (
 
 // --- New Service Functions ---
 
-// Image Studio: Generate
-export const generateImageWithImagen = async (prompt: string, aspectRatio: '1:1' | '16:9' | '9:16' | '4:3' | '3:4'): Promise<string> => {
+// Image Combination
+export const combineImages = async (
+    images: { base64: string; mimeType: string }[],
+    prompt: string
+): Promise<{ base64: string, mimeType: string }> => {
     const ai = getAiClient();
-    const response = await ai.models.generateImages({
-        model: 'imagen-4.0-generate-001',
-        prompt: prompt,
+    const imageParts = images.map(img => ({
+        inlineData: {
+            data: img.base64,
+            mimeType: img.mimeType,
+        }
+    }));
+    const textPart = { text: prompt };
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: {
+            parts: [...imageParts, textPart],
+        },
         config: {
-            numberOfImages: 1,
-            outputMimeType: 'image/png',
-            aspectRatio: aspectRatio,
+            responseModalities: [Modality.IMAGE],
         },
     });
 
-    const base64ImageBytes = response.generatedImages[0].image.imageBytes;
-    return `data:image/png;base64,${base64ImageBytes}`;
+    const imagePart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+
+    if (imagePart && imagePart.inlineData) {
+        return { base64: imagePart.inlineData.data, mimeType: imagePart.inlineData.mimeType };
+    }
+
+    const finishReason = response.candidates?.[0]?.finishReason;
+    const responseText = response.text;
+    
+    let errorMessage = "Image combination failed to produce an image.";
+    if (finishReason === 'SAFETY') {
+        errorMessage = `Image combination failed due to safety policies. Your prompt may need to be revised.`;
+    } else if (responseText && responseText.trim()) {
+        errorMessage = `Image combination failed. The model responded with: "${responseText.trim()}"`;
+    } else if (finishReason) {
+        errorMessage = `Image combination failed. Reason: ${finishReason}.`;
+    } else if (!response.candidates || response.candidates.length === 0) {
+        errorMessage = "Image combination failed because the model returned no response. This could be due to a network issue, an invalid API key, or a billing problem.";
+    }
+    
+    throw new Error(errorMessage);
+};
+
+// Image Studio: Generate with Gemini Flash Image
+export const generateImage = async (prompt: string): Promise<string> => {
+    const ai = getAiClient();
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: {
+            parts: [
+                { text: prompt },
+            ],
+        },
+        config: {
+            responseModalities: [Modality.IMAGE],
+        },
+    });
+
+    const imagePart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+
+    if (imagePart && imagePart.inlineData) {
+        const base64ImageBytes: string = imagePart.inlineData.data;
+        const mimeType = imagePart.inlineData.mimeType;
+        return `data:${mimeType};base64,${base64ImageBytes}`;
+    }
+
+    // Handle errors
+    const finishReason = response.candidates?.[0]?.finishReason;
+    const responseText = response.text;
+    
+    let errorMessage = "Image generation failed to produce an image.";
+    if (finishReason === 'SAFETY') {
+        errorMessage = `Image generation failed due to safety policies. Your prompt may need to be revised.`;
+    } else if (responseText && responseText.trim()) {
+        errorMessage = `Image generation failed. The model responded with: "${responseText.trim()}"`;
+    } else if (finishReason) {
+        errorMessage = `Image generation failed. Reason: ${finishReason}.`;
+    } else if (!response.candidates || response.candidates.length === 0) {
+        errorMessage = "Image generation failed because the model returned no response. This could be due to a network issue, an invalid API key, or a billing problem.";
+    }
+    
+    throw new Error(errorMessage);
 };
 
 // Image Studio: Edit

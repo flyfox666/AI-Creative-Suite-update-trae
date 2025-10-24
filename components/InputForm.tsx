@@ -2,6 +2,7 @@ import React from 'react';
 import ProBadge from './ProBadge';
 import { useLocalization } from '../contexts/LocalizationContext';
 
+type ReferenceImageMode = 'contextual' | 'combine';
 interface InputFormProps {
   userInput: string;
   setUserInput: (value: string) => void;
@@ -19,6 +20,8 @@ interface InputFormProps {
   onSubmit: () => void;
   isLoading: boolean;
   isProUser: boolean;
+  referenceImageMode: ReferenceImageMode;
+  setReferenceImageMode: (mode: ReferenceImageMode) => void;
 }
 
 const UploadIcon: React.FC<{className?: string}> = ({ className }) => (
@@ -50,7 +53,9 @@ const InputForm: React.FC<InputFormProps> = ({
   onReferenceImageRemove,
   onSubmit,
   isLoading,
-  isProUser
+  isProUser,
+  referenceImageMode,
+  setReferenceImageMode,
 }) => {
   const { t } = useLocalization();
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -70,6 +75,7 @@ const InputForm: React.FC<InputFormProps> = ({
   const maxScenes = isProUser ? 10 : 3;
   const maxImages = isProUser ? 10 : 3;
   const canUploadMore = referenceImages.length < maxImages;
+  const combineCost = isProUser ? t('storyboard.form.refImageModeCombineCostPro') : t('storyboard.form.refImageModeCombineCostFree');
 
   return (
     <div className="space-y-6">
@@ -159,6 +165,42 @@ const InputForm: React.FC<InputFormProps> = ({
                     </label>
                 )}
             </div>
+             {referenceImages.length > 1 && (
+                <div className="mt-4 p-4 bg-gray-900/50 rounded-lg border border-gray-700">
+                    <h4 className="text-md font-medium text-gray-300">{t('storyboard.form.refImageModeTitle')}</h4>
+                    <p className="text-xs text-gray-500 mb-3">{t('storyboard.form.refImageModeHint')}</p>
+                    <div className="flex flex-col gap-2">
+                        <label className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${referenceImageMode === 'contextual' ? 'border-purple-500 bg-purple-900/20' : 'border-gray-600 hover:bg-gray-700/50'}`}>
+                            <input 
+                                type="radio" 
+                                name="ref-mode" 
+                                checked={referenceImageMode === 'contextual'} 
+                                onChange={() => setReferenceImageMode('contextual')} 
+                                className="h-4 w-4 text-purple-600 bg-gray-700 border-gray-500 focus:ring-purple-500"
+                                disabled={isLoading}
+                            />
+                            <div className="ml-3 text-sm">
+                                <span className="font-medium text-gray-200">{t('storyboard.form.refImageModeContextualTitle')}</span>
+                                <p className="text-gray-400 text-xs">{t('storyboard.form.refImageModeContextualHint')}</p>
+                            </div>
+                        </label>
+                        <label className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${referenceImageMode === 'combine' ? 'border-purple-500 bg-purple-900/20' : 'border-gray-600 hover:bg-gray-700/50'}`}>
+                            <input 
+                                type="radio" 
+                                name="ref-mode" 
+                                checked={referenceImageMode === 'combine'} 
+                                onChange={() => setReferenceImageMode('combine')} 
+                                className="h-4 w-4 text-purple-600 bg-gray-700 border-gray-500 focus:ring-purple-500"
+                                disabled={isLoading}
+                            />
+                            <div className="ml-3 text-sm">
+                                <span className="font-medium text-gray-200">{t('storyboard.form.refImageModeCombineTitle')}</span>
+                                <p className="text-gray-400 text-xs">{t('storyboard.form.refImageModeCombineHint', { cost: combineCost })}</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            )}
         </div>
       </div>
       
