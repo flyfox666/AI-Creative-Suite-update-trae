@@ -113,6 +113,8 @@
     "useInStoryboardButton": "在故事板中使用",
     "clearChatButton": "清空对话",
     "clearChatTooltip": "开始新的对话",
+    "regenerateButton": "重新生成",
+    "editButton": "再次编辑",
     "errorNoPromptForImages": "请添加提示来描述如何编辑或合并您的图片。",
     "errorCredits": "积分不足。此操作需要 {{cost}} 积分，但您只有 {{userCredits}}。",
     "errorImageLimit": "您最多可以上传 {{max}} 张图片。",

@@ -113,6 +113,8 @@
     "useInStoryboardButton": "Use in Storyboard",
     "clearChatButton": "Clear Chat",
     "clearChatTooltip": "Start a new conversation",
+    "regenerateButton": "Regenerate",
+    "editButton": "Edit",
     "errorNoPromptForImages": "Please add a prompt to describe how to edit or combine your image(s).",
     "errorCredits": "Not enough credits. This action costs {{cost}} credits, but you only have {{userCredits}}.",
     "errorImageLimit": "You can upload a maximum of {{max}} images.",

@@ -6,13 +6,22 @@ import { useLocalization } from '../contexts/LocalizationContext';
 
 // --- Type Definitions ---
 type ImagePayload = { url: string; base64: string; mimeType: string };
+
+type GenerationContext = {
+  prompt: string;
+  images: ImagePayload[];
+  mode: 'generate' | 'edit' | 'combine';
+};
+
 type ChatMessage = {
   id: number;
   sender: 'user' | 'ai' | 'system';
   text?: string;
   images?: ImagePayload[];
   isError?: boolean;
+  generationContext?: GenerationContext;
 };
+
 
 // --- Prop Definitions ---
 interface ImageStudioProps {
@@ -38,6 +47,16 @@ const CloseIcon: React.FC<{className?: string}> = ({ className }) => (
 const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.033-2.134H8.71c-1.123 0-2.033.954-2.033 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+    </svg>
+);
+const RegenerateIcon: React.FC<{className?: string}> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5M4 4l1.5 1.5A9 9 0 0120.5 15M20 20l-1.5-1.5A9 9 0 003.5 9" />
+    </svg>
+);
+const EditIcon: React.FC<{className?: string}> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
     </svg>
 );
 
@@ -70,6 +89,7 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const promptInputRef = useRef<HTMLTextAreaElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // When locale changes, update the initial system message
@@ -117,7 +137,6 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
 
     try {
       const newImages = await Promise.all(
-        // Fix: Explicitly type `file` as `File` to fix a type inference issue.
         Array.from(files).map(async (file: File) => {
           const { base64, mimeType } = await fileToBase64(file);
           const url = `data:${mimeType};base64,${base64}`;
@@ -126,7 +145,6 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
       );
       setStagedImages(prev => [...prev, ...newImages]);
     } catch (err) {
-      // Fix: Improved error handling to show a more specific message. The err variable is now checked and its message is displayed if it's an Error instance.
       const errorMessage = err instanceof Error ? err.message : t('imageStudio.errorFileProcess');
       addErrorMessage(errorMessage);
     } finally {
@@ -147,7 +165,7 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
     }
 
     const mode = stagedImages.length === 0 ? 'generate' : stagedImages.length === 1 ? 'edit' : 'combine';
-    const costs = t('imageStudio.cost', {}) as any; // This is a hack to get the cost object
+    const costs = t('imageStudio.cost', {}) as any;
     const creditCost = isProUser ? costs[mode].pro : costs[mode].free;
 
     if (user.credits < creditCost) {
@@ -195,6 +213,11 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
         id: Date.now() + 1,
         sender: 'ai',
         images: [resultImage],
+        generationContext: {
+            prompt: currentPrompt,
+            images: currentImages,
+            mode,
+        }
       };
       setMessages(prev => [...prev, aiMessage]);
       spendCredits(creditCost);
@@ -223,6 +246,63 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
+  };
+
+  const handleRegenerate = async (context: GenerationContext) => {
+    if (isLoading) return;
+
+    const { mode, prompt: regenPrompt, images: regenImages } = context;
+    const costs = t('imageStudio.cost', {}) as any;
+    const creditCost = isProUser ? costs[mode].pro : costs[mode].free;
+
+    if (user.credits < creditCost) {
+        addErrorMessage(t('imageStudio.errorCredits', { cost: creditCost, userCredits: user.credits }));
+        return;
+    }
+
+    setIsLoading(true);
+
+    try {
+        let resultUrl: string;
+        if (mode === 'generate') {
+            resultUrl = await generateImage(regenPrompt);
+        } else if (mode === 'edit') {
+            resultUrl = await editImage(regenImages[0].base64, regenImages[0].mimeType, regenPrompt);
+        } else { // combine
+            const combined = await combineImagesService(regenImages, regenPrompt);
+            resultUrl = `data:${combined.mimeType};base64,${combined.base64}`;
+        }
+
+        const match = resultUrl.match(/^data:(image\/.+);base64,(.+)$/);
+        if (!match) throw new Error("Generated image data is invalid.");
+
+        const resultImage: ImagePayload = {
+            url: resultUrl,
+            mimeType: match[1],
+            base64: match[2]
+        };
+
+        const aiMessage: ChatMessage = {
+            id: Date.now() + 1,
+            sender: 'ai',
+            images: [resultImage],
+            generationContext: context, // Carry over the same context
+        };
+        setMessages(prev => [...prev, aiMessage]);
+        spendCredits(creditCost);
+
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        addErrorMessage(errorMessage);
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  const handleEditAgain = (imageToEdit: ImagePayload) => {
+      if (isLoading) return;
+      setStagedImages([imageToEdit]);
+      promptInputRef.current?.focus();
   };
   
 
@@ -269,9 +349,19 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
                  </div>
                )}
                 {msg.sender === 'ai' && msg.images && msg.images.length > 0 && (
-                    <div className="flex justify-start gap-2 pt-2">
-                        <button onClick={() => onUseImage(msg.images![0].url)} className="px-3 py-1.5 text-xs font-semibold bg-green-600/30 text-green-300 rounded-md hover:bg-green-600/50 transition-colors">{t('imageStudio.useInStoryboardButton')}</button>
-                        <button onClick={() => handleDownload(msg.images![0].url)} className="px-3 py-1.5 text-xs font-semibold bg-gray-600/50 text-gray-300 rounded-md hover:bg-gray-600 transition-colors">{t('common.download')}</button>
+                    <div className="flex justify-start flex-wrap gap-2 pt-2">
+                        <button onClick={() => onUseImage(msg.images![0].url)} className="flex items-center px-3 py-1.5 text-xs font-semibold bg-green-600/30 text-green-300 rounded-md hover:bg-green-600/50 transition-colors">{t('imageStudio.useInStoryboardButton')}</button>
+                        <button onClick={() => handleDownload(msg.images![0].url)} className="flex items-center px-3 py-1.5 text-xs font-semibold bg-gray-600/50 text-gray-300 rounded-md hover:bg-gray-600 transition-colors">{t('common.download')}</button>
+                        {msg.generationContext && (
+                            <button onClick={() => handleRegenerate(msg.generationContext!)} disabled={isLoading} className="flex items-center px-3 py-1.5 text-xs font-semibold bg-blue-600/30 text-blue-300 rounded-md hover:bg-blue-600/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <RegenerateIcon className="w-3.5 h-3.5 mr-1.5" />
+                                {t('imageStudio.regenerateButton')}
+                            </button>
+                        )}
+                        <button onClick={() => handleEditAgain(msg.images![0])} disabled={isLoading} className="flex items-center px-3 py-1.5 text-xs font-semibold bg-yellow-600/30 text-yellow-300 rounded-md hover:bg-yellow-600/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <EditIcon className="w-3.5 h-3.5 mr-1.5" />
+                            {t('imageStudio.editButton')}
+                        </button>
                     </div>
                 )}
              </div>
@@ -310,6 +400,7 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
         )}
         <div className="relative flex items-center">
             <textarea
+                ref={promptInputRef}
                 value={prompt}
                 onChange={e => setPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
