@@ -44,10 +44,11 @@
       "ideaPlaceholder": "e.g., A lone astronaut discovering a glowing forest on a distant moon.",
       "durationLabel": "Total Duration (seconds)",
       "scenesLabel": "Number of Scenes (Max {{maxScenes}})",
-      "referenceImageLabel": "Reference Image (Optional)",
-      "referenceImageHint": "Provide an image to guide the style and content of the first scene.",
+      "referenceImageLabel": "Reference Image(s) (Optional)",
+      "referenceImageHint": "Pro users can upload up to 10 images. Free users can upload up to 3.",
+      "referenceImageCostHint": "+5 credits per extra image (first is free).",
       "removeImageAria": "Remove image",
-      "uploadImageLabel": "Upload an image",
+      "uploadImageLabel": "Upload image(s)",
       "uploadHint": "PNG, JPG, GIF up to 10MB",
       "coherenceLabel": "Maintain Scene Coherence",
       "coherenceCost": "(+5 Credits/Scene)",
@@ -76,6 +77,7 @@
       "regenerateImageTooltip": "Regenerate Image"
     },
     "generator": {
+      "errorImageLimit": "You can upload a maximum of {{maxImages}} reference images.",
       "errorIdea": "Please enter a creative idea.",
       "errorInvalidNumbers": "Please enter valid, positive numbers for duration and scene count.",
       "errorNotEnoughCredits": "Not enough credits. This action costs {{totalCreditCost}} credits, but you only have {{userCredits}}.",

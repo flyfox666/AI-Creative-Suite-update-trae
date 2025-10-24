@@ -13,8 +13,9 @@ interface InputFormProps {
   setIsCoherent: (value: boolean) => void;
   aspectRatio: string;
   setAspectRatio: (value: string) => void;
-  referenceImage: { url: string } | null;
-  onReferenceImageChange: (file: File | null) => void;
+  referenceImages: { url: string }[];
+  onReferenceImageAdd: (files: FileList) => void;
+  onReferenceImageRemove: (url: string) => void;
   onSubmit: () => void;
   isLoading: boolean;
   isProUser: boolean;
@@ -44,8 +45,9 @@ const InputForm: React.FC<InputFormProps> = ({
   setIsCoherent,
   aspectRatio,
   setAspectRatio,
-  referenceImage,
-  onReferenceImageChange,
+  referenceImages,
+  onReferenceImageAdd,
+  onReferenceImageRemove,
   onSubmit,
   isLoading,
   isProUser
@@ -58,11 +60,16 @@ const InputForm: React.FC<InputFormProps> = ({
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    onReferenceImageChange(file || null);
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      onReferenceImageAdd(files);
+      event.target.value = ''; // Allow re-uploading the same file
+    }
   };
 
   const maxScenes = isProUser ? 10 : 3;
+  const maxImages = isProUser ? 10 : 3;
+  const canUploadMore = referenceImages.length < maxImages;
 
   return (
     <div className="space-y-6">
@@ -120,32 +127,38 @@ const InputForm: React.FC<InputFormProps> = ({
             <label className="block text-lg font-medium text-gray-300">
                 {t('storyboard.form.referenceImageLabel')}
             </label>
-            <p className="text-sm text-gray-500 mb-2">{t('storyboard.form.referenceImageHint')}</p>
-            {referenceImage ? (
-                <div className="relative group">
-                    <img src={referenceImage.url} alt="Reference preview" className="rounded-lg w-full h-auto max-h-48 object-contain bg-gray-900/50" />
-                    <button 
-                        onClick={() => onReferenceImageChange(null)}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 hover:bg-black/80 text-white transition-all opacity-50 group-hover:opacity-100"
-                        aria-label={t('storyboard.form.removeImageAria')}
-                    >
-                        <CloseIcon className="w-5 h-5" />
-                    </button>
-                </div>
-            ) : (
-                <label htmlFor="file-upload" className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md cursor-pointer hover:border-purple-500 transition-colors duration-200">
-                    <div className="space-y-1 text-center">
-                        <UploadIcon className="mx-auto h-12 w-12 text-gray-500"/>
-                        <div className="flex justify-center text-sm text-gray-500">
-                            <span className="font-medium text-purple-400">
-                                {t('storyboard.form.uploadImageLabel')}
-                            </span>
+            <p className="text-sm text-gray-500 mb-1">{t('storyboard.form.referenceImageHint')}</p>
+            {!isProUser && <p className="text-xs text-yellow-400 mb-2">{t('storyboard.form.referenceImageCostHint')}</p>}
+            <div className="space-y-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                    {referenceImages.map((image) => (
+                        <div key={image.url} className="relative group aspect-w-16 aspect-h-9">
+                            <img src={image.url} alt="Reference preview" className="rounded-lg w-full h-full object-cover bg-gray-900/50" />
+                            <button 
+                                onClick={() => onReferenceImageRemove(image.url)}
+                                className="absolute top-1 right-1 p-1.5 rounded-full bg-black/50 hover:bg-black/80 text-white transition-all opacity-0 group-hover:opacity-100"
+                                aria-label={t('storyboard.form.removeImageAria')}
+                            >
+                                <CloseIcon className="w-4 h-4" />
+                            </button>
                         </div>
-                        <p className="text-xs text-gray-500">{t('storyboard.form.uploadHint')}</p>
-                    </div>
-                    <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
-                </label>
-            )}
+                    ))}
+                </div>
+                {canUploadMore && (
+                    <label htmlFor="file-upload" className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md cursor-pointer hover:border-purple-500 transition-colors duration-200">
+                        <div className="space-y-1 text-center">
+                            <UploadIcon className="mx-auto h-12 w-12 text-gray-500"/>
+                            <div className="flex justify-center text-sm text-gray-500">
+                                <span className="font-medium text-purple-400">
+                                    {t('storyboard.form.uploadImageLabel')}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500">{t('storyboard.form.uploadHint')}</p>
+                        </div>
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" multiple />
+                    </label>
+                )}
+            </div>
         </div>
       </div>
       

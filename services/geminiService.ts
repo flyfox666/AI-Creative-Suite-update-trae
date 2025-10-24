@@ -130,18 +130,26 @@ export const generateStoryboardAndImages = async (
     sceneCount: number, 
     isCoherent: boolean, 
     aspectRatio: string, 
-    referenceImage: { base64: string; mimeType: string } | null
+    referenceImages: { base64: string; mimeType: string }[]
 ): Promise<StoryboardResult> => {
     const ai = getAiClient();
     
-    // 1. If there's a reference image, analyze it to enrich the user prompt
+    // 1. Analyze reference images to enrich the user prompt
     let finalUserInput = userInput;
-    if (referenceImage) {
+    if (referenceImages && referenceImages.length > 0) {
         try {
-            const imageAnalysis = await analyzeImage(referenceImage.base64, referenceImage.mimeType, 'Describe this image in detail for a film director, focusing on subject, environment, lighting, and mood.');
-            finalUserInput = `USER IDEA: "${userInput}"\n\nVISUAL CONTEXT FROM REFERENCE IMAGE: "${imageAnalysis}"\n\nCombine the user's idea with the visual context to create the storyboard. The reference image sets the style and content for the first scene.`;
+            const imageAnalysisPromises = referenceImages.map((img, index) => 
+                analyzeImage(img.base64, img.mimeType, `Describe this image in detail for a film director, focusing on subject, environment, lighting, and mood. This is reference image ${index + 1} of ${referenceImages.length}.`)
+            );
+            const analyses = await Promise.all(imageAnalysisPromises);
+            
+            const visualContext = analyses.map((analysis, index) => 
+                `REFERENCE IMAGE ${index + 1} DESCRIPTION: "${analysis}"`
+            ).join('\n\n');
+
+            finalUserInput = `USER IDEA: "${userInput}"\n\nVISUAL CONTEXT FROM REFERENCE IMAGES:\n${visualContext}\n\nCombine the user's idea with the visual context to create the storyboard. The reference images set the overall style, mood, and content. Use the first reference image as the primary inspiration for the first scene.`;
         } catch (error) {
-            console.warn("Could not analyze reference image, proceeding with text prompt only.", error);
+            console.warn("Could not analyze one or more reference images, proceeding with text prompt only.", error);
         }
     }
     
@@ -169,8 +177,9 @@ export const generateStoryboardAndImages = async (
     const scenesWithImages: Scene[] = [];
     let previousImageUrl: string | undefined = undefined;
 
-    if (referenceImage) {
-        previousImageUrl = `data:${referenceImage.mimeType};base64,${referenceImage.base64}`;
+    if (referenceImages && referenceImages.length > 0) {
+        const firstImage = referenceImages[0];
+        previousImageUrl = `data:${firstImage.mimeType};base64,${firstImage.base64}`;
     }
 
     for (let i = 0; i < parsedScenes.length; i++) {
@@ -178,8 +187,9 @@ export const generateStoryboardAndImages = async (
         let imageUrl: string | undefined;
 
         // If it's the first scene and we have a reference image, use it directly.
-        if (i === 0 && referenceImage) {
-            imageUrl = `data:${referenceImage.mimeType};base64,${referenceImage.base64}`;
+        if (i === 0 && referenceImages && referenceImages.length > 0) {
+            const firstImage = referenceImages[0];
+            imageUrl = `data:${firstImage.mimeType};base64,${firstImage.base64}`;
         } else {
             // Otherwise, generate the image. Use the previous image if coherence is on.
             const prevImgForGen = isCoherent ? previousImageUrl : undefined;

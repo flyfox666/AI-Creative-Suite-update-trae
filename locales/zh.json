@@ -45,7 +45,8 @@
       "durationLabel": "总时长（秒）",
       "scenesLabel": "场景数量（最多 {{maxScenes}}）",
       "referenceImageLabel": "参考图像（可选）",
-      "referenceImageHint": "提供一张图片来指导第一个场景的风格和内容。",
+      "referenceImageHint": "Pro 用户最多可上传 10 张图片，免费用户最多 3 张。",
+      "referenceImageCostHint": "每张额外图片 +5 积分（第一张免费）。",
       "removeImageAria": "移除图片",
       "uploadImageLabel": "上传图片",
       "uploadHint": "支持 PNG, JPG, GIF，最大 10MB",
@@ -76,6 +77,7 @@
       "regenerateImageTooltip": "重新生成图像"
     },
     "generator": {
+      "errorImageLimit": "您最多可以上传 {{maxImages}} 张参考图像。",
       "errorIdea": "请输入一个创意。",
       "errorInvalidNumbers": "请输入有效的正数作为时长和场景数。",
       "errorNotEnoughCredits": "积分不足。此操作需要 {{totalCreditCost}} 积分，但您只有 {{userCredits}}。",
