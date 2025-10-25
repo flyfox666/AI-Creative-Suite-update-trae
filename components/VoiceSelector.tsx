@@ -5,7 +5,7 @@ import { useLocalization } from '../contexts/LocalizationContext';
 import { generateSpeech } from '../services/geminiService';
 import { decode, pcmToWavBlob } from '../utils/audioUtils';
 
-type Voice = 'Kore' | 'Puck' | 'Zephyr' | 'Charon';
+type Voice = 'Kore' | 'Puck' | 'Zephyr' | 'Charon' | 'Fenrir' | 'Vindemiatrix' | 'Gacrux' | 'Schedar';
 
 interface VoiceSelectorProps {
     selectedVoice: Voice;
@@ -104,7 +104,7 @@ const VoiceSelector: React.FC<VoiceSelectorProps> = ({ selectedVoice, onVoiceCha
             
             {isOpen && (
                 <div 
-                    className="absolute top-full left-0 mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-2xl z-10 overflow-hidden"
+                    className="absolute top-full left-0 mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-2xl z-20 max-h-60 overflow-y-auto"
                     role="listbox"
                 >
                     {voices.map(voice => (

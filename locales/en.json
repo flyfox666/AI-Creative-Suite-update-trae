@@ -171,9 +171,9 @@
       "Zephyr": "Smooth, professional female voice.",
       "Charon": "Deep, authoritative male voice.",
       "Fenrir": "Powerful, epic male voice.",
-      "Aria": "Light, youthful female voice.",
-      "Leo": "Confident, clear male voice.",
-      "Nova": "Mysterious, calm female voice."
+      "Vindemiatrix": "A warm, clear female voice.",
+      "Gacrux": "A steady, resonant male voice.",
+      "Schedar": "A bright, professional female voice."
     },
     "inspirationTitle": "Inspiration Cues",
     "generateButton": "Generate Audio ({{cost}} Credits)",

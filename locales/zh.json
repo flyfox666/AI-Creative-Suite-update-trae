@@ -171,9 +171,9 @@
       "Zephyr": "流畅、专业的女声。",
       "Charon": "深沉、权威的男声。",
       "Fenrir": "强劲、史诗般的男声。",
-      "Aria": "轻快、年轻的女声。",
-      "Leo": "自信、清晰的男声。",
-      "Nova": "神秘、沉静的女声。"
+      "Vindemiatrix": "温暖、清晰的女声。",
+      "Gacrux": "稳重、洪亮的男声。",
+      "Schedar": "明亮、专业的女声。"
     },
     "inspirationTitle": "灵感提示",
     "generateButton": "生成音频 ({{cost}} 积分)",
