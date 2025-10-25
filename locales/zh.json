@@ -1,3 +1,4 @@
+
 {
   "header": {
     "title": "AI 创意套件",
@@ -7,6 +8,7 @@
     "storyboard": "故事板生成器",
     "image": "图像工作室",
     "analyzer": "媒体分析器",
+    "audio": "音频实验室",
     "pricing": "定价"
   },
   "footer": {
@@ -157,6 +159,32 @@
     "replicationScriptTitle": "复制脚本",
     "analysisResultTitle": "分析结果",
     "useAsIdeaButton": "用作故事板创意"
+  },
+  "audioLab": {
+    "title": "音频实验室",
+    "subtitle": "让您的文字栩栩如生。生成带有情感和个性的高品质语音。",
+    "placeholder": "输入文本以生成音频。使用像'兴奋地说：'或'(笑)'这样的提示来指导表演。",
+    "voicesTitle": "选择一个声音",
+    "voiceDescriptions": {
+      "Kore": "清晰、友好的女声。",
+      "Puck": "温暖、迷人的男声。",
+      "Zephyr": "流畅、专业的女声。",
+      "Charon": "深沉、权威的男声。",
+      "Fenrir": "强劲、史诗般的男声。",
+      "Aria": "轻快、年轻的女声。",
+      "Leo": "自信、清晰的男声。",
+      "Nova": "神秘、沉静的女声。"
+    },
+    "inspirationTitle": "灵感提示",
+    "generateButton": "生成音频 ({{cost}} 积分)",
+    "generatingButton": "正在生成音频...",
+    "resultTitle": "您的音频",
+    "errorCredits": "积分不足。此操作需要 {{cost}} 积分，但您只有 {{userCredits}}。",
+    "errorEmptyText": "请输入一些文本以生成音频。",
+    "auditionText": "你好，你可以使用我的声音，让你的文字栩栩如生。",
+    "auditionButtonAria": "试听此声音",
+    "errorPreviewCredits": "积分不足。试听需要 {{cost}} 积分。",
+    "errorAuditionFailed": "试听失败：{{errorMessage}}"
   },
   "pricing": {
     "title": "找到完美的计划",

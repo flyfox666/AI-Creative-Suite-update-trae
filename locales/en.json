@@ -1,3 +1,4 @@
+
 {
   "header": {
     "title": "AI Creative Suite",
@@ -7,6 +8,7 @@
     "storyboard": "Storyboard Generator",
     "image": "Image Studio",
     "analyzer": "Media Analyzer",
+    "audio": "Audio Lab",
     "pricing": "Pricing"
   },
   "footer": {
@@ -157,6 +159,32 @@
     "replicationScriptTitle": "Replication Script",
     "analysisResultTitle": "Analysis Result",
     "useAsIdeaButton": "Use as Storyboard Idea"
+  },
+  "audioLab": {
+    "title": "Audio Lab",
+    "subtitle": "Bring your text to life. Generate high-quality speech with emotion and character.",
+    "placeholder": "Enter text to generate audio. Use cues like 'Say excitedly:' or '(laughs)' to guide the performance.",
+    "voicesTitle": "Select a Voice",
+    "voiceDescriptions": {
+      "Kore": "Clear, friendly female voice.",
+      "Puck": "Warm, engaging male voice.",
+      "Zephyr": "Smooth, professional female voice.",
+      "Charon": "Deep, authoritative male voice.",
+      "Fenrir": "Powerful, epic male voice.",
+      "Aria": "Light, youthful female voice.",
+      "Leo": "Confident, clear male voice.",
+      "Nova": "Mysterious, calm female voice."
+    },
+    "inspirationTitle": "Inspiration Cues",
+    "generateButton": "Generate Audio ({{cost}} Credits)",
+    "generatingButton": "Generating Audio...",
+    "resultTitle": "Your Audio",
+    "errorCredits": "Not enough credits. This action costs {{cost}} credits, but you only have {{userCredits}}.",
+    "errorEmptyText": "Please enter some text to generate audio.",
+    "auditionText": "Hello, you can use my voice to bring your text to life.",
+    "auditionButtonAria": "Audition this voice",
+    "errorPreviewCredits": "Not enough credits. Preview costs {{cost}} credit(s).",
+    "errorAuditionFailed": "Audition failed: {{errorMessage}}"
   },
   "pricing": {
     "title": "Find the perfect plan",

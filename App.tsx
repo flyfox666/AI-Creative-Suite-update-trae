@@ -3,6 +3,7 @@ import React from 'react';
 import StoryboardGenerator from './components/StoryboardGenerator';
 import ImageStudio from './components/ImageStudio';
 import MediaAnalyzer from './components/MediaAnalyzer';
+import AudioLab from './components/AudioLab';
 import Pricing from './components/Pricing';
 import TabButton from './components/TabButton';
 import { UserProvider } from './contexts/UserContext';
@@ -11,7 +12,7 @@ import ProAccessModal from './components/ProAccessModal';
 import { LocalizationProvider, useLocalization } from './contexts/LocalizationContext';
 import LanguageSwitcher from './components/LanguageSwitcher';
 
-type Tab = 'storyboard' | 'image' | 'analyzer' | 'pricing';
+type Tab = 'storyboard' | 'image' | 'analyzer' | 'audio' | 'pricing';
 
 const AppContent: React.FC = () => {
   const { t } = useLocalization();
@@ -67,6 +68,11 @@ const AppContent: React.FC = () => {
             isActive={activeTab === 'analyzer'}
             onClick={() => setActiveTab('analyzer')}
           />
+          <TabButton
+            label={t('tabs.audio')}
+            isActive={activeTab === 'audio'}
+            onClick={() => setActiveTab('audio')}
+          />
            <TabButton
             label={t('tabs.pricing')}
             isActive={activeTab === 'pricing'}
@@ -87,6 +93,9 @@ const AppContent: React.FC = () => {
           </div>
           <div className={activeTab === 'analyzer' ? '' : 'hidden'}>
             <MediaAnalyzer onUseIdea={handleUseStoryboardIdea} />
+          </div>
+          <div className={activeTab === 'audio' ? '' : 'hidden'}>
+            <AudioLab />
           </div>
           <div className={activeTab === 'pricing' ? '' : 'hidden'}>
             <Pricing />

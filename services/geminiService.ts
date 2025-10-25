@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Modality } from "@google/genai";
 import { parseStoryboard } from "../utils/parser";
 import { Scene, StoryboardResult } from '../types';
@@ -379,4 +380,49 @@ export const analyzeVideo = async (base64VideoData: string, mimeType: string, us
         }
     });
     return response.text;
+};
+
+// TTS Generation
+export const generateSpeech = async (prompt: string, voiceName: string): Promise<string> => {
+    const ai = getAiClient();
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash-preview-tts",
+            contents: [{ parts: [{ text: prompt }] }],
+            config: {
+                responseModalities: [Modality.AUDIO],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: { voiceName: voiceName },
+                    },
+                },
+            },
+        });
+
+        const audioPart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (audioPart && audioPart.inlineData) {
+            return audioPart.inlineData.data;
+        }
+
+        const finishReason = response.candidates?.[0]?.finishReason;
+        const responseText = response.text;
+        
+        let errorMessage = "No audio was generated.";
+        if (finishReason === 'SAFETY') {
+            errorMessage = `Audio generation failed due to safety policies. Your prompt may need to be revised.`;
+        } else if (responseText && responseText.trim()) {
+            errorMessage = `Audio generation failed. The model responded with: "${responseText.trim()}"`;
+        } else if (finishReason) {
+            errorMessage = `Audio generation failed. Reason: ${finishReason}.`;
+        }
+        
+        throw new Error(errorMessage);
+
+    } catch (error) {
+        console.error("Error generating speech:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("An unknown error occurred while generating the speech.");
+    }
 };
