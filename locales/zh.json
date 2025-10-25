@@ -209,6 +209,8 @@
       "feature5_2_cost": "（+40 积分）",
       "feature5_3": "故事板 ZIP 下载",
       "feature5_3_cost": "（50 积分）",
+      "feature_audio_lab": "音频实验室权限",
+      "feature_audio_lab_cost": "(每100字符1积分)",
       "buttonText": "您当前的计划"
     },
     "proPlan": {
@@ -227,6 +229,8 @@
       "feature_image_studio_combine": "图像合并 ({{cost}} 积分/次)",
       "feature4": "包含所有高级功能：",
       "feature4_detail": "连贯性、增强分析、下载和编辑",
+      "feature_audio_lab": "音频实验室权限 (折扣价)",
+      "feature_audio_lab_cost": "(每100字符0.5积分)",
       "buttonText": "升级到 PRO",
       "buttonTextCurrent": "您是 PRO 用户"
     }

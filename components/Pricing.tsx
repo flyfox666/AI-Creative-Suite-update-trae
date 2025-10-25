@@ -76,6 +76,13 @@ const Pricing: React.FC = () => {
                                 </ul>
                             </span>
                         </li>
+                        <li className="flex items-start">
+                            <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
+                            <span>
+                                {t('pricing.freePlan.feature_audio_lab')}
+                                <span className="text-gray-400 text-sm ml-1">{t('pricing.freePlan.feature_audio_lab_cost')}</span>
+                            </span>
+                        </li>
                     </ul>
                     <div className="mt-auto pt-8">
                          <button
@@ -122,6 +129,13 @@ const Pricing: React.FC = () => {
                          <li className="flex items-start">
                             <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
                             <span><span className="font-semibold text-white">{t('pricing.proPlan.feature4')}</span> {t('pricing.proPlan.feature4_detail')}</span>
+                        </li>
+                        <li className="flex items-start">
+                            <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
+                            <span>
+                                {t('pricing.proPlan.feature_audio_lab')}
+                                <span className="text-gray-400 text-sm ml-1">{t('pricing.proPlan.feature_audio_lab_cost')}</span>
+                            </span>
                         </li>
                     </ul>
                      <div className="mt-auto pt-8">

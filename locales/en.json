@@ -209,6 +209,8 @@
       "feature5_2_cost": "(+40 Credits)",
       "feature5_3": "Storyboard ZIP Download",
       "feature5_3_cost": "(50 Credits)",
+      "feature_audio_lab": "Audio Lab access",
+      "feature_audio_lab_cost": "(1 credit per 100 characters)",
       "buttonText": "Your Current Plan"
     },
     "proPlan": {
@@ -227,6 +229,8 @@
       "feature_image_studio_combine": "Image Combining ({{cost}} credits/combine)",
       "feature4": "All Advanced Features Included:",
       "feature4_detail": "Coherence, Enhanced Analysis, Downloads, and Editing",
+      "feature_audio_lab": "Audio Lab access with discounted rates",
+      "feature_audio_lab_cost": "(0.5 credits per 100 characters)",
       "buttonText": "Upgrade to PRO",
       "buttonTextCurrent": "You are PRO"
     }
