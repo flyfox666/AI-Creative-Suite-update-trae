@@ -257,7 +257,12 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
 
 
   return (
-    <>
+    <div className="space-y-8">
+      <div className="text-center">
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-500">{t('storyboardGenerator.title')}</h2>
+          <p className="mt-2 text-lg text-gray-400 max-w-2xl mx-auto">{t('storyboardGenerator.subtitle')}</p>
+      </div>
+
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl shadow-purple-500/10 p-6 border border-gray-700">
         <InputForm 
           userInput={userInput}
@@ -326,7 +331,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
             onClose={handleCloseModal} 
         />
       )}
-    </>
+    </div>
   );
 };
 

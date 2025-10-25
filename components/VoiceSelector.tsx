@@ -1,11 +1,11 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { generateSpeech } from '../services/geminiService';
 import { decode, pcmToWavBlob } from '../utils/audioUtils';
 
-type Voice = 'Kore' | 'Puck' | 'Zephyr' | 'Charon' | 'Fenrir' | 'Vindemiatrix' | 'Gacrux' | 'Schedar';
+// FIX: Update Voice type to include all available voices and match the parent component's type.
+type Voice = 'Kore' | 'Puck' | 'Zephyr' | 'Charon' | 'Fenrir' | 'Vindemiatrix' | 'Gacrux' | 'Schedar' | 'Navi' | 'Fidis' | 'Acrab' | 'Deneb' | 'Rasalas' | 'Zaniah' | 'Kraz' | 'Izar';
 
 interface VoiceSelectorProps {
     selectedVoice: Voice;

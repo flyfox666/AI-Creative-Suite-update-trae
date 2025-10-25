@@ -1,8 +1,7 @@
-
 {
   "header": {
     "title": "AI 创意套件",
-    "subtitle": "您的一站式故事板、图像生成和媒体分析工具。"
+    "subtitle": "您的一站式故事板、图像生成、媒体分析和音频创作工具。"
   },
   "tabs": {
     "storyboard": "故事板生成器",
@@ -39,6 +38,10 @@
     "verifying": "验证中...",
     "contact": "如需申请升级，请联系：",
     "closeAria": "关闭弹窗"
+  },
+  "storyboardGenerator": {
+    "title": "故事板生成器",
+    "subtitle": "将您的创意想法转化为详细的多场景故事板，配备 AI 生成的视觉效果和专业的镜头描述。"
   },
   "storyboard": {
     "form": {
@@ -105,6 +108,8 @@
     }
   },
   "imageStudio": {
+    "title": "图像工作室",
+    "subtitle": "一个用于生成、编辑和组合图像的对话式界面。您的视觉创意的聊天伙伴。",
     "introMessage": "您好！我是您的创意伙伴。以下是图像工作室的使用方法：\n\n1. **生成**：只需输入提示即可从头开始创建新图像。\n2. **编辑**：上传**一张**图片并输入说明进行修改。\n3. **合并**：上传**多张**图片并描述如何将它们融合。\n\n**各项操作的积分成本：**\n- **生成**: {{gen_pro}} (PRO) / {{gen_free}} (免费)\n- **编辑**: {{edit_pro}} (PRO) / {{edit_free}} (免费)\n- **合并**: {{combine_pro}} (PRO) / {{combine_free}} (免费)",
     "placeholder": "描述图像或输入编辑指令...",
     "sendButtonAria": "发送消息",
@@ -137,6 +142,8 @@
     }
   },
   "mediaAnalyzer": {
+    "title": "媒体分析器",
+    "subtitle": "上传图像或视频以获得详细分析，或为您的创意项目生成复制脚本。",
     "imageTab": "图像分析",
     "videoTab": "视频复制",
     "uploadImageLabel": "上传图像",
@@ -173,7 +180,15 @@
       "Fenrir": "强劲、史诗般的男声。",
       "Vindemiatrix": "温暖、清晰的女声。",
       "Gacrux": "稳重、洪亮的男声。",
-      "Schedar": "明亮、专业的女声。"
+      "Schedar": "明亮、专业的女声。",
+      "Navi": "年轻、充满活力的女声。",
+      "Fidis": "沉稳、值得信赖的男声。",
+      "Acrab": "清脆、发音清晰的女声。",
+      "Deneb": "温柔、舒缓的男声。",
+      "Rasalas": "成熟、智慧的女声。",
+      "Zaniah": "明亮、愉快的女声。",
+      "Kraz": "沙哑、坚毅的男声。",
+      "Izar": "优雅、精致的男声。"
     },
     "inspirationTitle": "灵感提示",
     "generateButton": "生成音频 ({{cost}} 积分)",

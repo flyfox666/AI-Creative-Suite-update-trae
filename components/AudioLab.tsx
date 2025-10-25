@@ -7,7 +7,7 @@ import { Oval } from 'react-loader-spinner';
 import { decode, pcmToWavBlob } from '../utils/audioUtils';
 import VoiceSelector from './VoiceSelector';
 
-type Voice = 'Kore' | 'Puck' | 'Zephyr' | 'Charon' | 'Fenrir' | 'Vindemiatrix' | 'Gacrux' | 'Schedar';
+type Voice = 'Kore' | 'Puck' | 'Zephyr' | 'Charon' | 'Fenrir' | 'Vindemiatrix' | 'Gacrux' | 'Schedar' | 'Navi' | 'Fidis' | 'Acrab' | 'Deneb' | 'Rasalas' | 'Zaniah' | 'Kraz' | 'Izar';
 
 const VOICES: { name: Voice; descriptionKey: string }[] = [
     { name: 'Kore', descriptionKey: 'Kore' },
@@ -18,6 +18,14 @@ const VOICES: { name: Voice; descriptionKey: string }[] = [
     { name: 'Vindemiatrix', descriptionKey: 'Vindemiatrix' },
     { name: 'Gacrux', descriptionKey: 'Gacrux' },
     { name: 'Schedar', descriptionKey: 'Schedar' },
+    { name: 'Navi', descriptionKey: 'Navi' },
+    { name: 'Fidis', descriptionKey: 'Fidis' },
+    { name: 'Acrab', descriptionKey: 'Acrab' },
+    { name: 'Deneb', descriptionKey: 'Deneb' },
+    { name: 'Rasalas', descriptionKey: 'Rasalas' },
+    { name: 'Zaniah', descriptionKey: 'Zaniah' },
+    { name: 'Kraz', descriptionKey: 'Kraz' },
+    { name: 'Izar', descriptionKey: 'Izar' },
 ];
 
 const INSPIRATION_CUES = [

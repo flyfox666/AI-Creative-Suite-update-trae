@@ -197,6 +197,10 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
 
     return (
         <div className="space-y-8">
+            <div className="text-center">
+                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-500">{t('mediaAnalyzer.title')}</h2>
+                <p className="mt-2 text-lg text-gray-400 max-w-2xl mx-auto">{t('mediaAnalyzer.subtitle')}</p>
+            </div>
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl shadow-purple-500/10 p-6 border border-gray-700">
                 <div className="flex justify-center mb-6 border-b border-gray-700">
                     <button onClick={() => handleModeChange('image')} className={`px-6 py-2 font-medium border-b-2 transition-colors ${mode === 'image' ? 'border-purple-500 text-white' : 'border-transparent text-gray-400 hover:text-white'}`}>{t('mediaAnalyzer.imageTab')}</button>

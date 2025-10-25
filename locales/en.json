@@ -1,8 +1,7 @@
-
 {
   "header": {
     "title": "AI Creative Suite",
-    "subtitle": "Your all-in-one suite for storyboards, image generation, and media analysis."
+    "subtitle": "Your all-in-one suite for storyboards, image generation, media analysis, and audio creation."
   },
   "tabs": {
     "storyboard": "Storyboard Generator",
@@ -39,6 +38,10 @@
     "verifying": "Verifying...",
     "contact": "To request an upgrade, please contact:",
     "closeAria": "Close modal"
+  },
+  "storyboardGenerator": {
+    "title": "Storyboard Generator",
+    "subtitle": "Transform your creative ideas into detailed, multi-scene storyboards with AI-generated visuals and professional shot descriptions."
   },
   "storyboard": {
     "form": {
@@ -105,6 +108,8 @@
     }
   },
   "imageStudio": {
+    "title": "Image Studio",
+    "subtitle": "A conversational interface to generate, edit, and combine images. Your creative chat for visual ideation.",
     "introMessage": "Hello! I'm your creative partner. Here's how to use the Image Studio:\n\n1. **Generate**: Just type a prompt to create a new image from scratch.\n2. **Edit**: Upload **one** image and type instructions to modify it.\n3. **Combine**: Upload **multiple** images and describe how to merge them.\n\n**Credit Costs per Action:**\n- **Generate**: {{gen_pro}} (PRO) / {{gen_free}} (Free)\n- **Edit**: {{edit_pro}} (PRO) / {{edit_free}} (Free)\n- **Combine**: {{combine_pro}} (PRO) / {{combine_free}} (Free)",
     "placeholder": "Describe an image or type an edit instruction...",
     "sendButtonAria": "Send message",
@@ -137,6 +142,8 @@
     }
   },
   "mediaAnalyzer": {
+    "title": "Media Analyzer",
+    "subtitle": "Upload images or videos to get detailed analyses or generate replication scripts for your own creative projects.",
     "imageTab": "Image Analysis",
     "videoTab": "Video Replication",
     "uploadImageLabel": "Upload Image",
@@ -173,7 +180,15 @@
       "Fenrir": "Powerful, epic male voice.",
       "Vindemiatrix": "A warm, clear female voice.",
       "Gacrux": "A steady, resonant male voice.",
-      "Schedar": "A bright, professional female voice."
+      "Schedar": "A bright, professional female voice.",
+      "Navi": "Youthful, energetic female voice.",
+      "Fidis": "Calm, trustworthy male voice.",
+      "Acrab": "Crisp, articulate female voice.",
+      "Deneb": "Gentle, soothing male voice.",
+      "Rasalas": "Mature, wise female voice.",
+      "Zaniah": "Bright, cheerful female voice.",
+      "Kraz": "Raspy, gritty male voice.",
+      "Izar": "Elegant, refined male voice."
     },
     "inspirationTitle": "Inspiration Cues",
     "generateButton": "Generate Audio ({{cost}} Credits)",
