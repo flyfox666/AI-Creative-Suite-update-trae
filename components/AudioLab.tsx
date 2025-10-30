@@ -175,16 +175,35 @@ const AudioLab: React.FC = () => {
         
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
+            
+            // Find a supported mimeType to improve compatibility
+            const mimeTypes = [
+                'audio/webm;codecs=opus',
+                'audio/ogg;codecs=opus',
+                'audio/webm',
+                'audio/mp4',
+            ];
+            const supportedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+
+            const options = supportedMimeType ? { mimeType: supportedMimeType } : {};
+            
+            mediaRecorderRef.current = new MediaRecorder(stream, options);
+
             mediaRecorderRef.current.ondataavailable = (event) => {
-                audioChunksRef.current.push(event.data);
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
             };
+            
             mediaRecorderRef.current.onstop = () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                setRecordedAudioUrl(audioUrl);
+                if (audioChunksRef.current.length > 0) {
+                    const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorderRef.current?.mimeType });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    setRecordedAudioUrl(audioUrl);
+                }
                 stream.getTracks().forEach(track => track.stop()); // Release microphone
             };
+
             mediaRecorderRef.current.start();
             timerRef.current = window.setInterval(() => {
                 setRecordingSeconds(prev => prev + 1);
@@ -194,7 +213,10 @@ const AudioLab: React.FC = () => {
             console.error("Error accessing microphone:", err);
             setError(t('audioLab.errorMicrophone'));
             setRecordingState('idle');
-            if (timerRef.current) clearInterval(timerRef.current);
+            if (timerRef.current) {
+                 clearInterval(timerRef.current);
+                 timerRef.current = null;
+            }
         }
     };
 

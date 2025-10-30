@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI, Modality } from "@google/genai";
 import { parseStoryboard } from "../utils/parser";
 import { Scene, StoryboardResult } from '../types';
@@ -402,18 +403,27 @@ export const generateSpeech = async (prompt: string, voiceName: string, voiceDes
     const ai = getAiClient();
     const finalPrompt = voiceDescription ? `(${voiceDescription}) ${prompt}` : prompt;
 
+    // Build the config object
+    const config: any = {
+        responseModalities: [Modality.AUDIO],
+    };
+
+    if (!voiceDescription) {
+        // Only add speechConfig for pre-built voices
+        config.speechConfig = {
+            voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: voiceName },
+            },
+        };
+    }
+    // If voiceDescription exists, we omit speechConfig and let the model
+    // infer the voice from the prompt itself.
+
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash-preview-tts",
             contents: [{ parts: [{ text: finalPrompt }] }],
-            config: {
-                responseModalities: [Modality.AUDIO],
-                speechConfig: {
-                    voiceConfig: {
-                        prebuiltVoiceConfig: { voiceName: voiceName },
-                    },
-                },
-            },
+            config: config,
         });
 
         const audioPart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
