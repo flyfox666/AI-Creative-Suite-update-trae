@@ -1,5 +1,7 @@
 {
   "name": "AI Creative Suite",
   "description": "An application that takes a creative idea, video, or image and uses the Gemini API to generate detailed storyboards, edit images, and analyze media.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

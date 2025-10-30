@@ -15,3 +15,21 @@ export const fileToBase64 = (file: File): Promise<{ base64: string, mimeType: st
     reader.onerror = (error) => reject(error);
   });
 };
+
+export const blobToBase64 = (blob: Blob): Promise<{ base64: string, mimeType: string }> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onload = () => {
+      const result = reader.result as string;
+      const [header, base64Data] = result.split(';base64,');
+       if (!base64Data) {
+        reject(new Error("Invalid blob format"));
+        return;
+      }
+      const mimeType = header.replace('data:', '');
+      resolve({ base64: base64Data, mimeType: mimeType });
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};

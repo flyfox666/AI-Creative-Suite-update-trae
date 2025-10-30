@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import StoryboardGenerator from './components/StoryboardGenerator';
 import ImageStudio from './components/ImageStudio';
 import MediaAnalyzer from './components/MediaAnalyzer';
@@ -11,6 +11,7 @@ import UserStatus from './components/UserStatus';
 import ProAccessModal from './components/ProAccessModal';
 import { LocalizationProvider, useLocalization } from './contexts/LocalizationContext';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import AccessGate from './components/AccessGate';
 
 type Tab = 'storyboard' | 'image' | 'analyzer' | 'audio' | 'pricing';
 
@@ -110,11 +111,37 @@ const AppContent: React.FC = () => {
   );
 };
 
+const AUTH_KEY = 'creative_suite_access_granted';
+
 const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    try {
+        const isGranted = window.localStorage.getItem(AUTH_KEY);
+        if (isGranted === 'true') {
+            setIsAuthenticated(true);
+        }
+    } catch (error) {
+        console.error("Could not read from localStorage", error);
+    }
+  }, []);
+
+  const handleAuthentication = () => {
+      try {
+        window.localStorage.setItem(AUTH_KEY, 'true');
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Could not write to localStorage", error);
+         // If localStorage is blocked, allow access for the current session.
+        setIsAuthenticated(true);
+      }
+  };
+  
   return (
     <LocalizationProvider>
       <UserProvider>
-        <AppContent />
+        {isAuthenticated ? <AppContent /> : <AccessGate onAuthenticate={handleAuthentication} />}
       </UserProvider>
     </LocalizationProvider>
   )

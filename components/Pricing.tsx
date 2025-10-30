@@ -80,7 +80,10 @@ const Pricing: React.FC = () => {
                             <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
                             <span>
                                 {t('pricing.freePlan.feature_audio_lab')}
-                                <span className="text-gray-400 text-sm ml-1">{t('pricing.freePlan.feature_audio_lab_cost')}</span>
+                                 <ul className="list-disc list-inside text-gray-400 mt-1 pl-2 text-sm">
+                                    <li>{t('pricing.freePlan.feature_audio_lab_cost_prebuilt')}</li>
+                                    <li>{t('pricing.freePlan.feature_audio_lab_cost_custom')}</li>
+                                </ul>
                             </span>
                         </li>
                     </ul>
@@ -134,7 +137,10 @@ const Pricing: React.FC = () => {
                             <CheckIcon className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
                             <span>
                                 {t('pricing.proPlan.feature_audio_lab')}
-                                <span className="text-gray-400 text-sm ml-1">{t('pricing.proPlan.feature_audio_lab_cost')}</span>
+                                <ul className="list-disc list-inside text-gray-400 mt-1 pl-2 text-sm">
+                                    <li>{t('pricing.proPlan.feature_audio_lab_cost_prebuilt')}</li>
+                                    <li>{t('pricing.proPlan.feature_audio_lab_cost_custom')}</li>
+                                </ul>
                             </span>
                         </li>
                     </ul>
