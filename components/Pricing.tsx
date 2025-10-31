@@ -82,7 +82,6 @@ const Pricing: React.FC = () => {
                                 {t('pricing.freePlan.feature_audio_lab')}
                                  <ul className="list-disc list-inside text-gray-400 mt-1 pl-2 text-sm">
                                     <li>{t('pricing.freePlan.feature_audio_lab_cost_prebuilt')}</li>
-                                    <li>{t('pricing.freePlan.feature_audio_lab_cost_custom')}</li>
                                 </ul>
                             </span>
                         </li>
@@ -139,7 +138,6 @@ const Pricing: React.FC = () => {
                                 {t('pricing.proPlan.feature_audio_lab')}
                                 <ul className="list-disc list-inside text-gray-400 mt-1 pl-2 text-sm">
                                     <li>{t('pricing.proPlan.feature_audio_lab_cost_prebuilt')}</li>
-                                    <li>{t('pricing.proPlan.feature_audio_lab_cost_custom')}</li>
                                 </ul>
                             </span>
                         </li>

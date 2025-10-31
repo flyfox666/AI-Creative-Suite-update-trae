@@ -171,11 +171,6 @@
   "audioLab": {
     "title": "Audio Lab",
     "subtitle": "Bring your text to life. Generate high-quality speech with emotion and character.",
-    "prebuiltVoicesTab": "Pre-built Voices",
-    "customVoiceTab": "Custom Voice",
-    "customVoiceTitle": "Replicate a Voice",
-    "customVoiceDescription": "Provide an audio sample of a voice. We'll analyze its characteristics and apply them to your text.",
-    "uploadAudioLabel": "Upload Audio Sample (5-10s, no background noise)",
     "placeholder": "Enter text to generate audio. Use cues like 'Say excitedly:' or '(laughs)' to guide the performance.",
     "voicesTitle": "Select a Voice",
     "voiceDescriptions": {
@@ -200,26 +195,13 @@
     "generateButton": "Generate Audio ({{cost}} Credits)",
     "generatingButton": "Generating Audio...",
     "resultTitle": "Your Audio",
+    "noContent": "Audio generation content will appear here.",
     "errorCredits": "Not enough credits. This action costs {{cost}} credits, but you only have {{userCredits}}.",
     "errorEmptyText": "Please enter some text to generate audio.",
-    "errorNoCustomVoiceFile": "Please upload or record a custom voice audio sample.",
     "auditionText": "Hello, you can use my voice to bring your text to life.",
     "auditionButtonAria": "Audition this voice",
     "errorPreviewCredits": "Not enough credits. Preview costs {{cost}} credit(s).",
-    "errorAuditionFailed": "Audition failed: {{errorMessage}}",
-    "customVoiceCost": "Analysis Cost: {{cost}} credits",
-    "recordVoiceTitle": "Record a Sample",
-    "recordVoiceDescription": "Click the button to start recording a 5-10 second sample. Speak clearly in a quiet environment.",
-    "startRecordingButton": "Start Recording",
-    "stopRecordingButton": "Stop Recording",
-    "recordingStatus": "Recording...",
-    "reviewRecordingTitle": "Review Your Recording",
-    "useRecordingButton": "Use This Recording",
-    "recordAgainButton": "Record Again",
-    "orSeparator": "OR",
-    "errorMicrophone": "Microphone access was denied. Please enable it in your browser settings to use this feature.",
-    "micPermissionDeniedTitle": "Microphone Access Denied",
-    "micPermissionDeniedDescription": "You have blocked microphone access. To enable recording, please go to your browser's site settings (usually via the lock icon in the address bar) and allow microphone access for this page."
+    "errorAuditionFailed": "Audition failed: {{errorMessage}}"
   },
   "pricing": {
     "title": "Find the perfect plan",
@@ -246,7 +228,6 @@
       "feature5_3_cost": "(50 Credits)",
       "feature_audio_lab": "Audio Lab access",
       "feature_audio_lab_cost_prebuilt": "Pre-built voices (1 credit per 100 characters)",
-      "feature_audio_lab_cost_custom": "Custom voice replication (100 credits + generation cost)",
       "buttonText": "Your Current Plan"
     },
     "proPlan": {
@@ -267,7 +248,6 @@
       "feature4_detail": "Coherence, Enhanced Analysis, Downloads, and Editing",
       "feature_audio_lab": "Audio Lab access with discounted rates",
       "feature_audio_lab_cost_prebuilt": "Pre-built voices (0.5 credits per 100 characters)",
-      "feature_audio_lab_cost_custom": "Custom voice replication (50 credits + generation cost)",
       "buttonText": "Upgrade to PRO",
       "buttonTextCurrent": "You are PRO"
     }

@@ -383,46 +383,26 @@ export const analyzeVideo = async (base64VideoData: string, mimeType: string, us
     return response.text;
 };
 
-// Audio Lab: Analyze Voice
-export const analyzeVoice = async (base64AudioData: string, mimeType: string): Promise<string> => {
-    const ai = getAiClient();
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: {
-            parts: [
-                { text: "Describe the speaker's voice in this audio clip using a short phrase of descriptive adjectives. Your response should ONLY be the description, with no preamble. Example: 'A deep, warm, male voice' or 'A high-pitched, cheerful, female voice'." },
-                { inlineData: { data: base64AudioData, mimeType: mimeType } },
-            ]
-        },
-    });
-    return response.text.trim();
-};
-
 // TTS Generation
-export const generateSpeech = async (prompt: string, voiceName: string, voiceDescription?: string): Promise<string> => {
+export const generateSpeech = async (
+    prompt: string,
+    voiceName: string,
+): Promise<string> => {
     const ai = getAiClient();
-    const finalPrompt = voiceDescription ? `(${voiceDescription}) ${prompt}` : prompt;
-
-    // Build the config object
+    
     const config: any = {
         responseModalities: [Modality.AUDIO],
-    };
-
-    if (!voiceDescription) {
-        // Only add speechConfig for pre-built voices
-        config.speechConfig = {
+        speechConfig: {
             voiceConfig: {
                 prebuiltVoiceConfig: { voiceName: voiceName },
             },
-        };
-    }
-    // If voiceDescription exists, we omit speechConfig and let the model
-    // infer the voice from the prompt itself.
+        },
+    };
 
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash-preview-tts",
-            contents: [{ parts: [{ text: finalPrompt }] }],
+            contents: [{ parts: [{ text: prompt }] }],
             config: config,
         });
 
