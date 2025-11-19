@@ -8,8 +8,9 @@
     "storyboard": "Storyboard Generator",
     "image": "Image Studio",
     "analyzer": "Media Analyzer",
-    "audio": "Audio Lab",
-    "pricing": "Pricing"
+
+    "pricing": "Pricing",
+    "settings": "Settings"
   },
   "footer": {
     "poweredBy": "Powered by Google Gemini API. Generated content is for creative reference."
@@ -96,6 +97,7 @@
       "errorInvalidNumbers": "Please enter valid, positive numbers for duration and scene count.",
       "errorNotEnoughCredits": "Not enough credits. This action costs {{totalCreditCost}} credits, but you only have {{userCredits}}.",
       "errorFileProcess": "Failed to process image file.",
+      "errorImageTooLarge": "Image too large. Please upload a file under 10MB.",
       "errorUnexpected": "An unexpected error occurred. Please check the console.",
       "errorRegenCredits": "Not enough credits to regenerate. You need {{creditCost}} credits.",
       "errorRegenFailed": "Failed to regenerate image for Scene {{index}}: {{errorMessage}}",
@@ -126,7 +128,8 @@
     "errorNoPromptForImages": "Please add a prompt to describe how to edit or combine your image(s).",
     "errorCredits": "Not enough credits. This action costs {{cost}} credits, but you only have {{userCredits}}.",
     "errorImageLimit": "You can upload a maximum of {{max}} images.",
-    "errorFileProcess": "Failed to process image file.",
+      "errorFileProcess": "Failed to process image file.",
+      "errorFileTooLarge": "Image too large. Please upload a file under 10MB.",
     "cost": {
       "generate": {
         "pro": 10,
@@ -163,6 +166,7 @@
     "errorPrompt": "Please enter a prompt for image analysis.",
     "errorCredits": "Not enough credits. This action costs {{cost}} credits, but you only have {{userCredits}}.",
     "errorProcess": "Failed to process file.",
+    "videoUploadError": "Video too large. Please upload a file under 20MB.",
     "yourMediaTitle": "Your Media",
     "replicationScriptTitle": "Replication Script",
     "analysisResultTitle": "Analysis Result",
@@ -226,8 +230,8 @@
       "feature5_2_cost": "(+40 Credits)",
       "feature5_3": "Storyboard ZIP Download",
       "feature5_3_cost": "(50 Credits)",
-      "feature_audio_lab": "Audio Lab access",
-      "feature_audio_lab_cost_prebuilt": "Pre-built voices (1 credit per 100 characters)",
+
+
       "buttonText": "Your Current Plan"
     },
     "proPlan": {
@@ -246,18 +250,34 @@
       "feature_image_studio_combine": "Image Combining ({{cost}} credits/combine)",
       "feature4": "All Advanced Features Included:",
       "feature4_detail": "Coherence, Enhanced Analysis, Downloads, and Editing",
-      "feature_audio_lab": "Audio Lab access with discounted rates",
-      "feature_audio_lab_cost_prebuilt": "Pre-built voices (0.5 credits per 100 characters)",
+
+
       "buttonText": "Upgrade to PRO",
       "buttonTextCurrent": "You are PRO"
     }
   },
-  "accessGate": {
-    "title": "Access Required",
-    "subtitle": "Please enter the access code to continue.",
-    "placeholder": "Access Code",
-    "button": "Enter Suite",
-    "verifying": "Verifying...",
-    "error": "Invalid access code. Please try again."
-  }
+  "settings": {
+    "title": "Settings",
+    "provider": "Provider",
+    "providerAuto": "Auto (from environment)",
+    "modelChat": "Model for Chat/Storyboard",
+    "modelImage": "Model for Image",
+    "modelVision": "Model for Vision",
+    "modelVideo": "Model for Video",
+    "videoMaxTokens": "Video Max Tokens",
+    "replyLanguage": "AI Reply Language",
+    "replyLanguageAuto": "Auto (match input)",
+    "replyLanguageChinese": "Chinese",
+    "replyLanguageEnglish": "English",
+    "imageSizePreset": "Image Size",
+    "imageSizePreset2K": "2K",
+    "imageSizePreset4K": "4K",
+    "imageWatermark": "Enable watermark",
+    "unlimitedCredits": "Unlimited credits (testing)",
+    "unlimitedCreditsHint": "When enabled, credits won't be deducted and checks are bypassed.",
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "settings.unlimitedCredits": "Unlimited credits (testing)",
+  "settings.unlimitedCreditsHint": "When enabled, credits won't be deducted and checks are bypassed."
 }

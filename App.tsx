@@ -3,17 +3,18 @@ import React, { useState, useEffect } from 'react';
 import StoryboardGenerator from './components/StoryboardGenerator';
 import ImageStudio from './components/ImageStudio';
 import MediaAnalyzer from './components/MediaAnalyzer';
-import AudioLab from './components/AudioLab';
+
 import Pricing from './components/Pricing';
+import Settings from './components/Settings';
 import TabButton from './components/TabButton';
 import { UserProvider } from './contexts/UserContext';
 import UserStatus from './components/UserStatus';
 import ProAccessModal from './components/ProAccessModal';
 import { LocalizationProvider, useLocalization } from './contexts/LocalizationContext';
 import LanguageSwitcher from './components/LanguageSwitcher';
-import AccessGate from './components/AccessGate';
+ 
 
-type Tab = 'storyboard' | 'image' | 'analyzer' | 'audio' | 'pricing';
+type Tab = 'storyboard' | 'image' | 'analyzer' | 'pricing' | 'settings';
 
 const AppContent: React.FC = () => {
   const { t } = useLocalization();
@@ -69,15 +70,16 @@ const AppContent: React.FC = () => {
             isActive={activeTab === 'analyzer'}
             onClick={() => setActiveTab('analyzer')}
           />
-          <TabButton
-            label={t('tabs.audio')}
-            isActive={activeTab === 'audio'}
-            onClick={() => setActiveTab('audio')}
-          />
+          
            <TabButton
             label={t('tabs.pricing')}
             isActive={activeTab === 'pricing'}
             onClick={() => setActiveTab('pricing')}
+          />
+          <TabButton
+            label={t('tabs.settings')}
+            isActive={activeTab === 'settings'}
+            onClick={() => setActiveTab('settings')}
           />
         </nav>
 
@@ -95,11 +97,12 @@ const AppContent: React.FC = () => {
           <div className={activeTab === 'analyzer' ? '' : 'hidden'}>
             <MediaAnalyzer onUseIdea={handleUseStoryboardIdea} />
           </div>
-          <div className={activeTab === 'audio' ? '' : 'hidden'}>
-            <AudioLab />
-          </div>
+          
           <div className={activeTab === 'pricing' ? '' : 'hidden'}>
             <Pricing />
+          </div>
+          <div className={activeTab === 'settings' ? '' : 'hidden'}>
+            <Settings />
           </div>
         </main>
 
@@ -111,37 +114,11 @@ const AppContent: React.FC = () => {
   );
 };
 
-const AUTH_KEY = 'creative_suite_access_granted';
-
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    try {
-        const isGranted = window.localStorage.getItem(AUTH_KEY);
-        if (isGranted === 'true') {
-            setIsAuthenticated(true);
-        }
-    } catch (error) {
-        console.error("Could not read from localStorage", error);
-    }
-  }, []);
-
-  const handleAuthentication = () => {
-      try {
-        window.localStorage.setItem(AUTH_KEY, 'true');
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Could not write to localStorage", error);
-         // If localStorage is blocked, allow access for the current session.
-        setIsAuthenticated(true);
-      }
-  };
-  
   return (
     <LocalizationProvider>
       <UserProvider>
-        {isAuthenticated ? <AppContent /> : <AccessGate onAuthenticate={handleAuthentication} />}
+        <AppContent />
       </UserProvider>
     </LocalizationProvider>
   )

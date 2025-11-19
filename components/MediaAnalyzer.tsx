@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { analyzeImage, analyzeVideo } from '../services/geminiService';
+import { analyzeImage, analyzeVideo, uploadMediaDebug, uploadMediaWithStatus } from '../services/aiService';
+import { getProvider } from '../services/runtimeConfig';
 import { fileToBase64 } from '../utils/fileUtils';
 import { Oval } from 'react-loader-spinner';
 import CodeBlock from './CodeBlock';
@@ -28,6 +29,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
     const [videoFile, setVideoFile] = useState<{url: string, base64: string, mimeType: string} | null>(null);
     const [useThinkingMode, setUseThinkingMode] = useState<boolean>(false);
     const [videoAnalysisResult, setVideoAnalysisResult] = useState<string | null>(null);
+    const [videoUploadInfo, setVideoUploadInfo] = useState<{ uri?: string; status?: string; stage?: string } | null>(null);
 
     // General State
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -35,25 +37,70 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
 
     const isProUser = user.plan === 'pro';
 
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0];
         if (selectedFile) {
             setError(null);
+            // 20MB 限制，Base64 请求体过大可能导致中止
+            if (mode === 'video' && selectedFile.size > 20 * 1024 * 1024) {
+                setError(t('mediaAnalyzer.videoUploadError'));
+                return;
+            }
             try {
                 const { base64, mimeType } = await fileToBase64(selectedFile);
-                const url = URL.createObjectURL(selectedFile);
+                // 暂停并清理旧媒体预览
+                if (mode === 'video' && videoRef.current) {
+                    try { videoRef.current.pause(); } catch {}
+                    try {
+                        const oldUrl = videoFile?.url
+                        if (oldUrl) {
+                            try { videoRef.current.src = '' } catch {}
+                            try { URL.revokeObjectURL(oldUrl) } catch {}
+                        }
+                    } catch {}
+                } else {
+                    const oldImgUrl = imageFile?.url
+                    if (oldImgUrl) {
+                        try { URL.revokeObjectURL(oldImgUrl) } catch {}
+                    }
+                }
+                const url = `data:${mimeType};base64,${base64}`;
                 if (mode === 'image') {
                     setImageFile({ url, base64, mimeType });
                     setImageAnalysisResult(null);
                 } else {
                     setVideoFile({ url, base64, mimeType });
                     setVideoAnalysisResult(null);
+                    if (getProvider() === 'gemini') {
+                      setVideoUploadInfo({ stage: 'init' })
+                      uploadMediaWithStatus(base64, mimeType, (info) => {
+                        setVideoUploadInfo({ uri: info.uri, status: info.state || info.detail || '', stage: info.stage })
+                      }).catch(e => {
+                        setVideoUploadInfo({ status: e instanceof Error ? e.message : String(e), stage: 'error' })
+                      })
+                    } else {
+                      setVideoUploadInfo(null)
+                    }
                 }
             } catch (err) {
                 setError(t('mediaAnalyzer.errorProcess'));
             }
         }
     };
+
+    React.useEffect(() => {
+      return () => {
+        try { if (imageFile?.url) URL.revokeObjectURL(imageFile.url) } catch {}
+        try {
+          if (videoFile?.url) {
+            try { if (videoRef.current) videoRef.current.src = '' } catch {}
+            URL.revokeObjectURL(videoFile.url)
+          }
+        } catch {}
+      }
+    }, [])
 
     const handleAnalyze = async () => {
         const fileToAnalyze = mode === 'image' ? imageFile : videoFile;
@@ -94,12 +141,27 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
                 result = await analyzeImage(fileToAnalyze.base64, fileToAnalyze.mimeType, imagePrompt);
                 setImageAnalysisResult(result);
             } else { // video
+                try {
+                  if (getProvider() === 'gemini') {
+                    const info = await uploadMediaDebug(fileToAnalyze.base64, fileToAnalyze.mimeType)
+                    setVideoUploadInfo(info)
+                  } else {
+                    setVideoUploadInfo(null)
+                  }
+                } catch (e) {
+                  setVideoUploadInfo({ uri: '', status: e instanceof Error ? e.message : String(e) })
+                }
                 result = await analyzeVideo(fileToAnalyze.base64, fileToAnalyze.mimeType, useThinkingMode);
                 setVideoAnalysisResult(result);
             }
             spendCredits(creditCost);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unexpected error occurred during analysis.');
+            const msg = err instanceof Error ? err.message : String(err)
+            if (/ERR_ABORTED/.test(msg) || /blob:/.test(msg)) {
+                // 预览层的加载被中止，不影响分析结果，忽略此错误
+            } else {
+                setError(err instanceof Error ? err.message : 'An unexpected error occurred during analysis.')
+            }
         } finally {
             setIsLoading(false);
         }
@@ -182,7 +244,15 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
                         }
                     </div>
                 </div>
-                <div className="flex justify-end items-center pt-2">
+                <div className="flex justify-between items-start pt-2">
+                    {videoUploadInfo && (
+                      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3 w-80">
+                        <div className="text-sm text-gray-400">Files API 上传信息</div>
+                        <div className="mt-1 text-xs text-gray-300">阶段：<span className="font-mono">{videoUploadInfo.stage || 'N/A'}</span></div>
+                        <div className="mt-1 text-xs text-gray-300">状态：<span className="font-mono">{videoUploadInfo.status || 'N/A'}</span></div>
+                        <div className="mt-1 text-xs text-gray-300 break-all">file_uri：<span className="font-mono">{videoUploadInfo.uri || 'N/A'}</span></div>
+                      </div>
+                    )}
                     <button
                         onClick={handleAnalyze}
                         disabled={isLoading || !videoFile}
@@ -266,7 +336,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
                         {(mode === 'image' ? imageFile?.mimeType : videoFile?.mimeType)?.startsWith('image/') ? (
                             <img src={mode === 'image' ? imageFile?.url : videoFile?.url} alt="Uploaded media" className="rounded-lg shadow-xl mx-auto max-w-full" />
                         ) : (
-                            <video src={mode === 'image' ? imageFile?.url : videoFile?.url} controls className="rounded-lg shadow-xl mx-auto max-w-full" />
+                            <video ref={videoRef} src={mode === 'image' ? imageFile?.url : videoFile?.url} controls preload="metadata" className="rounded-lg shadow-xl mx-auto max-w-full" />
                         )}
                     </div>
                 )}
@@ -275,6 +345,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
                          {renderAnalysisResult()}
                     </div>
                 )}
+                
             </div>
         </div>
     );

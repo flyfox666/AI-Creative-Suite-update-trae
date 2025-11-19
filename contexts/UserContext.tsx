@@ -30,20 +30,28 @@ const getProUserTemplate = (email = 'pro@example.com'): User => ({
   credits: 1000, // Pro users get more credits
 });
 
+const isUnlimitedCredits = (): boolean => {
+  try { return (window.localStorage.getItem('settings.UNLIMITED_CREDITS') || '') === 'true' } catch { return false }
+}
+
 const getInitialUser = (): User => {
-    try {
-        const savedUser = window.localStorage.getItem(USER_STORAGE_KEY);
-        if (savedUser) {
-            // Add validation here if user object shape changes over time
-            return JSON.parse(savedUser);
-        }
-    } catch (error) {
-        console.error("Failed to read user from localStorage", error);
-        // If parsing fails, clear the corrupted data
-        window.localStorage.removeItem(USER_STORAGE_KEY);
+  try {
+    const savedUser = window.localStorage.getItem(USER_STORAGE_KEY);
+    if (savedUser) {
+      // Add validation here if user object shape changes over time
+      const parsed = JSON.parse(savedUser);
+      if (isUnlimitedCredits()) return { ...parsed, credits: Number.MAX_SAFE_INTEGER }
+      return parsed;
     }
-    // Return a default free user if nothing is saved or if there was an error
-    return getFreeUserTemplate();
+  } catch (error) {
+    console.error("Failed to read user from localStorage", error);
+    // If parsing fails, clear the corrupted data
+    window.localStorage.removeItem(USER_STORAGE_KEY);
+  }
+  // Return a default free user if nothing is saved or if there was an error
+  const base = getFreeUserTemplate();
+  if (isUnlimitedCredits()) return { ...base, credits: Number.MAX_SAFE_INTEGER }
+  return base;
 };
 
 
@@ -61,12 +69,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [user]);
 
     const spendCredits = (amount: number) => {
-        setUser(currentUser => {
-            return {
-                ...currentUser,
-                credits: Math.max(0, currentUser.credits - amount),
-            }
-        });
+        if (isUnlimitedCredits()) return;
+        setUser(currentUser => ({
+            ...currentUser,
+            credits: Math.max(0, currentUser.credits - amount),
+        }));
     };
 
     const login = async (email: string): Promise<boolean> => {

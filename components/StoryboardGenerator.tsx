@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { generateStoryboardAndImages, generateImageForScene, combineImages } from '../services/geminiService';
+import { generateStoryboardAndImages, generateImageForScene, combineImages } from '../services/aiService';
 import { StoryboardResult, Scene } from '../types';
 import InputForm from './InputForm';
 import ResultsDisplay from './ResultsDisplay';
@@ -75,6 +75,9 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
     try {
         const newImages = await Promise.all(
             filesToAdd.map(async (file) => {
+                if (file.size > 10 * 1024 * 1024) {
+                    throw new Error(t('storyboard.generator.errorImageTooLarge'))
+                }
                 const { base64, mimeType } = await fileToBase64(file);
                 const url = `data:${mimeType};base64,${base64}`;
                 return { url, base64, mimeType };

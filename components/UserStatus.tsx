@@ -7,6 +7,9 @@ import { useLocalization } from '../contexts/LocalizationContext';
 const UserStatus: React.FC = () => {
     const { user, openProModal, switchToFree } = useUser();
     const { t } = useLocalization();
+    const unlimited = (() => {
+        try { return (window.localStorage.getItem('settings.UNLIMITED_CREDITS') || '') === 'true' } catch { return false }
+    })();
 
     if (!user) return null;
 
@@ -25,7 +28,7 @@ const UserStatus: React.FC = () => {
         <div className="bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-lg p-2 flex items-center space-x-3 text-sm">
             <div className="text-right">
                  <div className="text-gray-300">
-                    <span className="font-semibold">{user.credits}</span>
+                    <span className="font-semibold">{unlimited ? '∞' : user.credits}</span>
                     <span className="text-gray-400"> {t('userStatus.credits')}</span>
                 </div>
             </div>

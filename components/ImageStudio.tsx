@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { generateImage, editImage, combineImages as combineImagesService } from '../services/geminiService';
+import { generateImage, editImage, combineImages as combineImagesService } from '../services/aiService';
 import { fileToBase64 } from '../utils/fileUtils';
 import { useUser } from '../contexts/UserContext';
 import { useLocalization } from '../contexts/LocalizationContext';
@@ -138,6 +138,9 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
     try {
       const newImages = await Promise.all(
         Array.from(files).map(async (file: File) => {
+          if (file.size > 10 * 1024 * 1024) {
+            throw new Error(t('imageStudio.errorFileTooLarge'))
+          }
           const { base64, mimeType } = await fileToBase64(file);
           const url = `data:${mimeType};base64,${base64}`;
           return { url, base64, mimeType };
@@ -194,20 +197,23 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
       if (mode === 'generate') {
         resultUrl = await generateImage(currentPrompt);
       } else if (mode === 'edit') {
-        resultUrl = await editImage(currentImages[0].base64, currentImages[0].mimeType, currentPrompt);
+        resultUrl = await editImage(currentImages[0].base64 || currentImages[0].url, currentImages[0].mimeType, currentPrompt);
       } else { // combine
         const combined = await combineImagesService(currentImages, currentPrompt);
         resultUrl = `data:${combined.mimeType};base64,${combined.base64}`;
       }
-      
-      const match = resultUrl.match(/^data:(image\/.+);base64,(.+)$/);
-      if (!match) throw new Error("Generated image data is invalid.");
-      
-      const resultImage: ImagePayload = {
-          url: resultUrl,
-          mimeType: match[1],
-          base64: match[2]
-      };
+      const isDataUrl = /^data:image\//.test(resultUrl)
+      const resultImage: ImagePayload = isDataUrl
+        ? {
+            url: resultUrl,
+            mimeType: (resultUrl.match(/^data:(image\/[^;]+)/)?.[1] || 'image/png'),
+            base64: (resultUrl.match(/;base64,(.+)$/)?.[1] || ''),
+          }
+        : {
+            url: resultUrl,
+            mimeType: 'image/url',
+            base64: '',
+          }
       
       const aiMessage: ChatMessage = {
         id: Date.now() + 1,
@@ -267,20 +273,23 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
         if (mode === 'generate') {
             resultUrl = await generateImage(regenPrompt);
         } else if (mode === 'edit') {
-            resultUrl = await editImage(regenImages[0].base64, regenImages[0].mimeType, regenPrompt);
+            resultUrl = await editImage(regenImages[0].base64 || regenImages[0].url, regenImages[0].mimeType, regenPrompt);
         } else { // combine
             const combined = await combineImagesService(regenImages, regenPrompt);
             resultUrl = `data:${combined.mimeType};base64,${combined.base64}`;
         }
-
-        const match = resultUrl.match(/^data:(image\/.+);base64,(.+)$/);
-        if (!match) throw new Error("Generated image data is invalid.");
-
-        const resultImage: ImagePayload = {
-            url: resultUrl,
-            mimeType: match[1],
-            base64: match[2]
-        };
+        const isDataUrl = /^data:image\//.test(resultUrl)
+        const resultImage: ImagePayload = isDataUrl
+          ? {
+              url: resultUrl,
+              mimeType: (resultUrl.match(/^data:(image\/[^;]+)/)?.[1] || 'image/png'),
+              base64: (resultUrl.match(/;base64,(.+)$/)?.[1] || ''),
+            }
+          : {
+              url: resultUrl,
+              mimeType: 'image/url',
+              base64: '',
+            }
 
         const aiMessage: ChatMessage = {
             id: Date.now() + 1,

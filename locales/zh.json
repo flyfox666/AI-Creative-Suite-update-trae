@@ -8,8 +8,9 @@
     "storyboard": "故事板生成器",
     "image": "图像工作室",
     "analyzer": "媒体分析器",
-    "audio": "音频实验室",
-    "pricing": "定价"
+
+    "pricing": "定价",
+    "settings": "设置"
   },
   "footer": {
     "poweredBy": "由 Google Gemini API 驱动。生成内容仅供创意参考。"
@@ -96,6 +97,7 @@
       "errorInvalidNumbers": "请输入有效的正数作为时长和场景数。",
       "errorNotEnoughCredits": "积分不足。此操作需要 {{totalCreditCost}} 积分，但您只有 {{userCredits}}。",
       "errorFileProcess": "处理图像文件失败。",
+      "errorImageTooLarge": "图片过大。请上传小于 10MB 的文件。",
       "errorUnexpected": "发生意外错误。请检查控制台。",
       "errorRegenCredits": "积分不足，无法重新生成。您需要 {{cost}} 积分。",
       "errorRegenFailed": "为场景 {{index}} 重新生成图像失败：{{errorMessage}}",
@@ -126,7 +128,8 @@
     "errorNoPromptForImages": "请添加提示来描述如何编辑或合并您的图片。",
     "errorCredits": "积分不足。此操作需要 {{cost}} 积分，但您只有 {{userCredits}}。",
     "errorImageLimit": "您最多可以上传 {{max}} 张图片。",
-    "errorFileProcess": "处理图像文件失败。",
+      "errorFileProcess": "处理图像文件失败。",
+      "errorFileTooLarge": "图片过大。请上传小于 10MB 的文件。",
     "cost": {
       "generate": {
         "pro": 10,
@@ -163,6 +166,7 @@
     "errorPrompt": "请输入图像分析的提示。",
     "errorCredits": "积分不足。此操作需要 {{cost}} 积分，但您只有 {{userCredits}}。",
     "errorProcess": "处理文件失败。",
+    "videoUploadError": "视频过大。请上传小于 20MB 的文件。",
     "yourMediaTitle": "您的媒体",
     "replicationScriptTitle": "复制脚本",
     "analysisResultTitle": "分析结果",
@@ -226,8 +230,8 @@
       "feature5_2_cost": "（+40 积分）",
       "feature5_3": "故事板 ZIP 下载",
       "feature5_3_cost": "（50 积分）",
-      "feature_audio_lab": "音频实验室权限",
-      "feature_audio_lab_cost_prebuilt": "预设声音 (每100字符1积分)",
+
+
       "buttonText": "您当前的计划"
     },
     "proPlan": {
@@ -246,18 +250,34 @@
       "feature_image_studio_combine": "图像合并 ({{cost}} 积分/次)",
       "feature4": "包含所有高级功能：",
       "feature4_detail": "连贯性、增强分析、下载和编辑",
-      "feature_audio_lab": "音频实验室权限 (折扣价)",
-      "feature_audio_lab_cost_prebuilt": "预设声音 (每100字符0.5积分)",
+
+
       "buttonText": "升级到 PRO",
       "buttonTextCurrent": "您是 PRO 用户"
     }
   },
-  "accessGate": {
-    "title": "需要访问权限",
-    "subtitle": "请输入访问码以继续。",
-    "placeholder": "访问码",
-    "button": "进入套件",
-    "verifying": "验证中...",
-    "error": "访问码无效。请重试。"
-  }
+  "settings": {
+    "title": "设置",
+    "provider": "提供者",
+    "providerAuto": "自动（来自环境）",
+    "modelChat": "对话/分镜模型",
+    "modelImage": "图像模型",
+    "modelVision": "视觉理解模型",
+    "modelVideo": "视频分析模型",
+    "videoMaxTokens": "视频最大 Token 数",
+    "replyLanguage": "AI 回复语言",
+    "replyLanguageAuto": "自动（匹配输入）",
+    "replyLanguageChinese": "中文",
+    "replyLanguageEnglish": "English",
+    "imageSizePreset": "图像尺寸",
+    "imageSizePreset2K": "2K",
+    "imageSizePreset4K": "4K",
+    "imageWatermark": "启用水印",
+    "unlimitedCredits": "无限积分（测试）",
+    "unlimitedCreditsHint": "启用后不再扣减积分，并跳过积分校验。",
+    "save": "保存",
+    "saved": "已保存"
+  },
+  "settings.unlimitedCredits": "无限积分（测试）",
+  "settings.unlimitedCreditsHint": "启用后不再扣减积分，并跳过积分校验。"
 }
