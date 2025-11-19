@@ -16,10 +16,18 @@ export default defineConfig(({ mode }) => {
             secure: true,
             rewrite: (path) => path.replace(/^\/arkapi/, '')
           }
+          ,
+          '/api/openai': {
+            target: 'https://vibecodingapi.ai/v1',
+            changeOrigin: true,
+            secure: true,
+            rewrite: (path) => path.replace(/^\/api\/openai/, '')
+          }
         }
       },
       plugins: [react()],
       define: {
+        'process.env': '{}',
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_BASE_URL': JSON.stringify(env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com'),

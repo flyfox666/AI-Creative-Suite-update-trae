@@ -18,6 +18,20 @@ export const getGeminiConfig = () => ({
   baseUrl: get('settings.GEMINI_BASE_URL', process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com'),
 })
 
+export const getGeminiOpenAICompat = (): boolean => {
+  const v = get('settings.GEMINI_OPENAI_COMPAT', 'false')
+  return v === 'true'
+}
+
+export const getFetchImageAsBase64 = (): boolean => {
+  const v = get('settings.FETCH_IMAGE_AS_BASE64', 'false')
+  return v === 'true'
+}
+
+export const getOpenAICompatApiKey = (): string => {
+  return get('settings.OPENAI_COMPAT_API_KEY', process.env.OPENAI_COMPAT_API_KEY || '')
+}
+
 export const getArkConfig = () => {
   const isLocal = typeof window !== 'undefined' && (
     /localhost|127\.0\.0\.1/.test(window.location.hostname) ||

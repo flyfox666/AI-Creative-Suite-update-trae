@@ -22,6 +22,7 @@
     "step3": "选择对话、图像、视觉理解和视频的模型。",
     "step4": "点击保存以应用配置。",
     "step5": "将视频最大 Token 数设置为 4096，以提升长视频分析效果。",
+    "step6": "启用 OpenAI 兼容模式时：需要同时填写第三方 API 密钥以及有效的 Gemini API Key（Files API 使用 Google）。",
     "videoMaxTokensTitle": "视频最大 Token 数",
     "videoMaxTokensDetail": "推荐设置为 4096。更高的 Token 允许分析更长的视频并获得更深入的结果，但可能增加时延与调用成本；过低的值会导致分析被截断或准确度下降。",
     "goSettings": "前往设置",
@@ -271,7 +272,12 @@
     "unlimitedCredits": "无限积分（测试）",
     "unlimitedCreditsHint": "启用后不再扣减积分，并跳过积分校验。",
     "save": "保存",
-    "saved": "已保存"
+    "saved": "已保存",
+    "openaiCompat": "OpenAI 兼容 Base URL"
+    ,
+    "fetchImageAsBase64": "代理抓取图片为 Base64"
+    ,
+    "openaiCompatApiKey": "OpenAI 兼容 API 密钥（第三方）"
   },
   "header.help": "帮助",
   "settings.unlimitedCredits": "无限积分（测试）",

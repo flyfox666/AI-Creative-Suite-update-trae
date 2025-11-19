@@ -1,19 +1,70 @@
 import type { AIProvider } from './aiProvider'
 import { parseStoryboard } from '../../utils/parser'
 import type { StoryboardResult, Scene } from '../../types'
-import { getGeminiConfig, getModelConfig, getReplyLanguage, getVideoMaxTokens, getCoherenceStrength, getUseFilesApiForMedia, getDebugLogs } from '../runtimeConfig'
+import { getGeminiConfig, getModelConfig, getReplyLanguage, getVideoMaxTokens, getCoherenceStrength, getUseFilesApiForMedia, getDebugLogs, getGeminiOpenAICompat, getFetchImageAsBase64, getOpenAICompatApiKey } from '../runtimeConfig'
 
 const toDataUrl = (base64: string, mimeType: string) => `data:${mimeType};base64,${base64}`
 
-const geminiFetch = async (path: string, body: any) => {
-  const { apiKey, baseUrl } = getGeminiConfig()
-  if (!apiKey) throw new Error('Gemini API key is not configured')
-  if (/\/openai\//i.test(baseUrl)) {
-    throw new Error('Gemini Base URL is set to OpenAI-compatible endpoint. Use https://generativelanguage.googleapis.com for image generation')
+
+const isOpenAIBase = (raw: string): boolean => {
+  const b = (raw || '')
+  return /openai/i.test(b) || /\/v1$/i.test(b) || /\/chat\/completions$/i.test(b) || /\/images\/generations$/i.test(b)
+}
+
+const openAIImageGenerate = async (prompt: string, aspectRatio: string, model: string): Promise<string> => {
+  const apiKey = getOpenAICompatApiKey()
+  const { baseUrl } = getGeminiConfig()
+  const b = (baseUrl || '').replace(/\/+$/, '')
+  const url = '/api/openai/images/generations'
+  const size = aspectRatio === '16:9' ? '1024x576' : aspectRatio === '9:16' ? '576x1024' : '1024x1024'
+  const body = { model: model || 'nano-banana-vip', prompt, n: 1, size }
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(body) })
+  if (!res.ok) {
+    const text = await res.text()
+    try {
+      const j = JSON.parse(text)
+      const msg = j?.error?.message || j?.message || text
+      throw new Error(`OpenAI-style image error ${res.status}: ${msg}`)
+    } catch {
+      throw new Error(`OpenAI-style image error ${res.status}: ${text}`)
+    }
   }
+  const j = await res.json()
+  const preferBase64 = getFetchImageAsBase64()
+  const topUrl = typeof j?.url === 'string' ? j.url : null
+  const dataStringUrl = typeof j?.data === 'string' ? j.data : null
+  const d = Array.isArray(j?.data) ? j.data[0] : null
+  const arrUrl = d?.url || d?.image_url || null
+  const arrB64 = d?.b64_json || d?.b64 || null
+  const resultUrl = topUrl || dataStringUrl || arrUrl || null
+  const guessMime = (u: string): string => (/\.webp($|\?)/i.test(u) ? 'image/webp' : (/\.png($|\?)/i.test(u) ? 'image/png' : (/\.jpg|\.jpeg($|\?)/i.test(u) ? 'image/jpeg' : 'image/webp')))
+  if (arrB64) return toDataUrl(String(arrB64), 'image/png')
+  if (resultUrl) {
+    if (preferBase64) {
+      const fr = await fetch('/api/openai/images/fetch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: resultUrl }) })
+      if (fr.ok) {
+        const info = await fr.json()
+        const mt = info?.mimeType || guessMime(resultUrl)
+        const b64 = info?.base64 || ''
+        if (b64) return toDataUrl(b64, mt)
+      }
+    }
+    return String(resultUrl)
+  }
+  const b64 = j?.b64_json || j?.b64 || null
+  if (b64) return toDataUrl(String(b64), 'image/webp')
+  throw new Error('OpenAI-style image did not return data')
+}
+
+const geminiFetch = async (path: string, body: any) => {
+  const apiKey = getOpenAICompatApiKey()
+  const { baseUrl } = getGeminiConfig()
+  if (!apiKey) throw new Error('Gemini API key is not configured')
   const dbgOn = (process?.env?.NODE_ENV !== 'production') && getDebugLogs()
   const t0 = Date.now()
-  const res = await fetch(`${baseUrl}${path}`, {
+  const compat = getGeminiOpenAICompat() || isOpenAIBase(baseUrl)
+  const coreBase = compat ? 'https://generativelanguage.googleapis.com' : resolveCoreBase(baseUrl)
+  const res = await fetch(`${coreBase}${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -46,7 +97,9 @@ const geminiFetch = async (path: string, body: any) => {
 const geminiOpenAIChat = async (body: any) => {
   const { apiKey, baseUrl } = getGeminiConfig()
   if (!apiKey) throw new Error('Gemini API key is not configured')
-  const url = `${baseUrl}/v1beta/openai/chat/completions`
+  const b = (baseUrl || '').replace(/\/+$/, '')
+  const compat = getGeminiOpenAICompat() || isOpenAIBase(baseUrl)
+  const url = compat ? '/api/openai/chat/completions' : `${b}/v1beta/openai/chat/completions`
   const dbgOn = (process?.env?.NODE_ENV !== 'production') && getDebugLogs()
   const t0 = Date.now()
   const res = await fetch(url, {
@@ -88,7 +141,8 @@ const geminiUploadFile = async (bytes: Uint8Array, mimeType: string): Promise<{ 
   const { apiKey, baseUrl } = getGeminiConfig()
   if (!apiKey) throw new Error('Gemini API key is not configured')
   const dbgOn = (process?.env?.NODE_ENV !== 'production') && getDebugLogs()
-  const initRes = await fetch(`${baseUrl}/upload/v1beta/files`, {
+  const coreBase = resolveCoreBase(baseUrl)
+  const initRes = await fetch(`${coreBase}/upload/v1beta/files`, {
     method: 'POST',
     headers: {
       'x-goog-api-key': apiKey,
@@ -131,7 +185,7 @@ const geminiUploadFile = async (bytes: Uint8Array, mimeType: string): Promise<{ 
   const maxWaitMs = 15000
   const start = Date.now()
   while (Date.now() - start < maxWaitMs) {
-    const getRes = await fetch(`${baseUrl}/v1beta/${encodeURI(name)}`, { headers: { 'x-goog-api-key': apiKey } })
+    const getRes = await fetch(`${coreBase}/v1beta/${encodeURI(name)}`, { headers: { 'x-goog-api-key': apiKey } })
     if (getRes.ok) {
       const info = await getRes.json()
       const state = info?.state || info?.file?.state || ''
@@ -208,6 +262,10 @@ export const GeminiProvider: AIProvider = {
         const meta = await geminiUploadFile(bytes, m[1])
         parts.push({ file_data: { file_uri: meta.uri, mime_type: meta.mimeType } })
       }
+    }
+    const { baseUrl } = getGeminiConfig()
+    if (getGeminiOpenAICompat() || isOpenAIBase(baseUrl)) {
+      return openAIImageGenerate(strictPrefix + prompt, aspectRatio, model)
     }
     const tryBodies = [
       { contents: [{ role: 'user', parts }], generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio } } },
@@ -313,6 +371,10 @@ ${isChinese ? '每个场景包含主体、环境、光照、风格、动作提�
   async generateImage(prompt: string): Promise<string> {
     const models = getModelConfig()
     const model = (models.image && /image|flash-image/i.test(models.image)) ? models.image : 'gemini-2.5-flash-image'
+    const { baseUrl } = getGeminiConfig()
+    if (getGeminiOpenAICompat() || isOpenAIBase(baseUrl)) {
+      return openAIImageGenerate(prompt, '16:9', model)
+    }
     const parts = [{ text: prompt }]
     const tryBodies = [
       { contents: [{ role: 'user', parts }], generationConfig: { responseModalities: ['IMAGE'] } },
@@ -413,7 +475,8 @@ export const geminiUploadMediaForDebug = async (base64Data: string, mimeType: st
     const bytes = base64ToBytes(base64Data)
     const { apiKey, baseUrl } = getGeminiConfig()
     if (!apiKey) throw new Error('Gemini API key is not configured')
-    const initRes = await fetch(`${baseUrl}/upload/v1beta/files`, {
+    const coreBase = resolveCoreBase(baseUrl)
+    const initRes = await fetch(`${coreBase}/upload/v1beta/files`, {
       method: 'POST',
       headers: {
         'x-goog-api-key': apiKey,
@@ -445,7 +508,8 @@ export const geminiUploadMediaForDebug = async (base64Data: string, mimeType: st
     const name = meta?.name || meta?.file?.name || ''
     const uri = meta?.uri || meta?.file?.uri || name
     const { apiKey: k, baseUrl: b } = getGeminiConfig()
-    const getRes = await fetch(`${b}/v1beta/${encodeURI(name)}`, { headers: { 'x-goog-api-key': k } })
+    const coreB = resolveCoreBase(b)
+    const getRes = await fetch(`${coreB}/v1beta/${encodeURI(name)}`, { headers: { 'x-goog-api-key': k } })
     if (!getRes.ok) return { uri, status: `get ${getRes.status}: ${await getRes.text()}` }
     const info = await getRes.json()
     const state = info?.state || info?.file?.state || 'UNKNOWN'
@@ -465,7 +529,8 @@ export const geminiUploadMediaWithStatus = async (
   if (!apiKey) return { uri: '', status: 'Gemini API key is not configured' }
   try {
     onStatus({ stage: 'init' })
-    const initRes = await fetch(`${baseUrl}/upload/v1beta/files`, {
+    const coreBase = resolveCoreBase(baseUrl)
+    const initRes = await fetch(`${coreBase}/upload/v1beta/files`, {
       method: 'POST',
       headers: {
         'x-goog-api-key': apiKey,
@@ -501,7 +566,7 @@ export const geminiUploadMediaWithStatus = async (
     let status = 'PENDING'
     const start = Date.now()
     while (Date.now() - start < 15000) {
-      const getRes = await fetch(`${baseUrl}/v1beta/${encodeURI(name)}`, { headers: { 'x-goog-api-key': apiKey } })
+      const getRes = await fetch(`${coreBase}/v1beta/${encodeURI(name)}`, { headers: { 'x-goog-api-key': apiKey } })
       if (getRes.ok) {
         const info = await getRes.json()
         const state = info?.state || info?.file?.state || 'UNKNOWN'
@@ -515,4 +580,11 @@ export const geminiUploadMediaWithStatus = async (
   } catch (e: any) {
     return { uri: '', status: String(e?.message || e) }
   }
+}
+const resolveCoreBase = (raw: string): string => {
+  const b = (raw || '').replace(/\/+$/, '')
+  if (/openai/i.test(b) || /\/v1$/i.test(b) || /\/chat\/completions$/i.test(b) || /\/images\/generations$/i.test(b)) {
+    return 'https://generativelanguage.googleapis.com'
+  }
+  return b || 'https://generativelanguage.googleapis.com'
 }

@@ -22,6 +22,7 @@
     "step3": "Select models for Chat, Image, Vision, and Video.",
     "step4": "Click Save to apply your configuration.",
     "step5": "Set Video Max Tokens to 4096 for better long-video analysis.",
+    "step6": "If using OpenAI-compatible mode: fill BOTH the third-party API key and a valid Gemini API key (Files API uses Google).",
     "videoMaxTokensTitle": "Video Max Tokens",
     "videoMaxTokensDetail": "Recommended 4096. Higher tokens allow longer clips and deeper analysis, but may increase latency and cost. Too low may truncate analysis or reduce accuracy.",
     "goSettings": "Go to Settings",
@@ -275,7 +276,12 @@
     "unlimitedCredits": "Unlimited credits (testing)",
     "unlimitedCreditsHint": "When enabled, credits won't be deducted and checks are bypassed.",
     "save": "Save",
-    "saved": "Saved"
+    "saved": "Saved",
+    "openaiCompat": "OpenAI-compatible base URL"
+    ,
+    "fetchImageAsBase64": "Proxy-fetch image as Base64"
+    ,
+    "openaiCompatApiKey": "OpenAI-compatible API Key (third-party)"
   },
   "settings.unlimitedCredits": "Unlimited credits (testing)",
   "settings.unlimitedCreditsHint": "When enabled, credits won't be deducted and checks are bypassed."

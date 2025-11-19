@@ -18,6 +18,9 @@ const Settings: React.FC = () => {
   const [imageSizePreset, setImageSizePreset] = useState('')
   const [imageWatermark, setImageWatermark] = useState(false)
   const [geminiBase, setGeminiBase] = useState('')
+  const [geminiOpenAICompat, setGeminiOpenAICompat] = useState(false)
+  const [fetchImageAsBase64, setFetchImageAsBase64] = useState(false)
+  const [openaiCompatKey, setOpenaiCompatKey] = useState('')
   const [geminiChatPreset, setGeminiChatPreset] = useState('')
   const [geminiChatCustom, setGeminiChatCustom] = useState('')
   const [geminiImagePreset, setGeminiImagePreset] = useState('')
@@ -62,6 +65,9 @@ const Settings: React.FC = () => {
       setImageWatermark((window.localStorage.getItem('settings.IMAGE_WATERMARK') || '') === 'true')
 
       setGeminiBase(window.localStorage.getItem('settings.GEMINI_BASE_URL') || '')
+      setGeminiOpenAICompat((window.localStorage.getItem('settings.GEMINI_OPENAI_COMPAT') || '') === 'true')
+      setFetchImageAsBase64((window.localStorage.getItem('settings.FETCH_IMAGE_AS_BASE64') || '') === 'true')
+      setOpenaiCompatKey(window.localStorage.getItem('settings.OPENAI_COMPAT_API_KEY') || '')
       const cv = window.localStorage.getItem('settings.MODEL_CHAT') || ''
       const iv = window.localStorage.getItem('settings.MODEL_IMAGE') || ''
       const vv = window.localStorage.getItem('settings.MODEL_VISION') || ''
@@ -112,6 +118,9 @@ const Settings: React.FC = () => {
       'settings.AI_PROVIDER': provider || 'ark',
       'settings.GEMINI_API_KEY': geminiKey,
       'settings.GEMINI_BASE_URL': geminiBase,
+      'settings.GEMINI_OPENAI_COMPAT': String(geminiOpenAICompat),
+      'settings.FETCH_IMAGE_AS_BASE64': String(fetchImageAsBase64),
+      'settings.OPENAI_COMPAT_API_KEY': openaiCompatKey,
       'settings.ARK_API_KEY': arkKey,
       'settings.ARK_BASE_URL': arkBase,
       'settings.MODEL_CHAT': provider === 'gemini' ? (geminiChatPreset === 'custom' ? geminiChatCustom : geminiChatPreset) : (arkChatPreset === 'custom' ? arkChatCustom : arkChatPreset || modelChat),
@@ -176,6 +185,25 @@ const Settings: React.FC = () => {
             <div>
               <label className="block text-sm mb-1">Gemini Base URL</label>
               <input value={geminiBase} onChange={e => setGeminiBase(e.target.value)} placeholder="https://generativelanguage.googleapis.com" className="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg text-gray-200" />
+            </div>
+            <div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={geminiOpenAICompat} onChange={e => setGeminiOpenAICompat(e.target.checked)} />
+                <span>{t('settings.openaiCompat')}</span>
+              </label>
+            </div>
+            {geminiOpenAICompat && (
+              <div>
+                <label className="block text-sm mb-1">OpenAI-compatible API Key</label>
+                <input value={openaiCompatKey} onChange={e => setOpenaiCompatKey(e.target.value)} placeholder="Bearer token for third-party"
+                  className="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg text-gray-200" />
+              </div>
+            )}
+            <div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={fetchImageAsBase64} onChange={e => setFetchImageAsBase64(e.target.checked)} />
+                <span>{t('settings.fetchImageAsBase64')}</span>
+              </label>
             </div>
             <div>
               <label className="block text-sm mb-1">Gemini API Key</label>

@@ -26,6 +26,7 @@ const HelpModal: React.FC<Props> = ({ open, onClose, onGoSettings }) => {
             <li>{t('help.step3')}</li>
             <li>{t('help.step4')}</li>
             <li>{t('help.step5')}</li>
+            <li>{t('help.step6')}</li>
           </ol>
           <div className="mt-4 text-sm text-gray-400">
             <div className="font-semibold text-gray-300">{t('help.videoMaxTokensTitle')}</div>
