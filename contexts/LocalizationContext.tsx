@@ -23,9 +23,10 @@ export const LocalizationProvider: React.FC<{ children: ReactNode }> = ({ childr
     useEffect(() => {
         const fetchTranslations = async () => {
             try {
+                const base = import.meta.env.BASE_URL || '/';
                 const [enRes, zhRes] = await Promise.all([
-                    fetch('/locales/en.json'),
-                    fetch('/locales/zh.json')
+                    fetch(`${base}locales/en.json`),
+                    fetch(`${base}locales/zh.json`)
                 ]);
                 if (!enRes.ok || !zhRes.ok) {
                     throw new Error('Failed to fetch translation files');

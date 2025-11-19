@@ -5,7 +5,6 @@ import { getProvider } from '../services/runtimeConfig';
 import { fileToBase64 } from '../utils/fileUtils';
 import { Oval } from 'react-loader-spinner';
 import CodeBlock from './CodeBlock';
-import { useUser } from '../contexts/UserContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 
 type AnalyzerMode = 'image' | 'video';
@@ -15,7 +14,6 @@ interface MediaAnalyzerProps {
 }
 
 const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
-    const { user, spendCredits } = useUser();
     const { t } = useLocalization();
     const [mode, setMode] = useState<AnalyzerMode>('image');
     
@@ -35,7 +33,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const isProUser = user.plan === 'pro';
+    const isProUser = true;
 
     const videoRef = React.useRef<HTMLVideoElement>(null);
 
@@ -113,21 +111,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
             return;
         }
         
-        let creditCost: number;
-        if (mode === 'image') {
-            creditCost = isProUser ? 8 : 10;
-        } else { // video
-            if (isProUser) {
-                creditCost = 65;
-            } else {
-                creditCost = useThinkingMode ? 120 : 80;
-            }
-        }
-
-        if (user.credits < creditCost) {
-            setError(t('mediaAnalyzer.errorCredits', { cost: creditCost, userCredits: user.credits }));
-            return;
-        }
+        // no credits logic
 
         setIsLoading(true);
         setError(null);
@@ -154,7 +138,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
                 result = await analyzeVideo(fileToAnalyze.base64, fileToAnalyze.mimeType, useThinkingMode);
                 setVideoAnalysisResult(result);
             }
-            spendCredits(creditCost);
+            // no credits deduction
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err)
             if (/ERR_ABORTED/.test(msg) || /blob:/.test(msg)) {
@@ -197,11 +181,10 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
         setError(null);
     };
 
-    const imageCreditCost = isProUser ? 8 : 10;
+    const imageCreditCost = undefined as any;
     
     const getVideoCreditCost = () => {
-        if (isProUser) return 65;
-        return useThinkingMode ? 120 : 80;
+        return undefined as any;
     };
 
 
@@ -258,7 +241,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
                         disabled={isLoading || !videoFile}
                         className="px-8 py-3 font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg shadow-lg hover:from-purple-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 disabled:scale-100"
                     >
-                        {isLoading ? t('common.analyzing') : t('mediaAnalyzer.analyzeVideoButton', { cost: getVideoCreditCost() })}
+                        {isLoading ? t('common.analyzing') : t('mediaAnalyzer.analyzeVideoButton', {})}
                     </button>
                 </div>
             </div>
@@ -307,7 +290,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
                                 disabled={isLoading || !imageFile}
                                 className="px-8 py-3 font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg shadow-lg hover:from-purple-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 disabled:scale-100"
                             >
-                                {isLoading ? t('common.analyzing') : t('mediaAnalyzer.analyzeImageButton', { cost: imageCreditCost })}
+                                {isLoading ? t('common.analyzing') : t('mediaAnalyzer.analyzeImageButton', {})}
                             </button>
                         </div>
                     </div>

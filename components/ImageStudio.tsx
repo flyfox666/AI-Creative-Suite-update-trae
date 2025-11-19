@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { generateImage, editImage, combineImages as combineImagesService } from '../services/aiService';
 import { fileToBase64 } from '../utils/fileUtils';
-import { useUser } from '../contexts/UserContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 
 // --- Type Definitions ---
@@ -63,23 +62,13 @@ const EditIcon: React.FC<{className?: string}> = ({ className }) => (
 
 // --- Main Component ---
 const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
-  const { user, spendCredits } = useUser();
   const { t } = useLocalization();
-  const isProUser = user.plan === 'pro';
 
   const getInitialMessage = useCallback((): ChatMessage => {
-      const costs = t('imageStudio.cost', {}) as any;
       return {
           id: 0,
           sender: 'system',
-          text: t('imageStudio.introMessage', {
-              gen_free: costs.generate.free,
-              gen_pro: costs.generate.pro,
-              edit_free: costs.edit.free,
-              edit_pro: costs.edit.pro,
-              combine_free: costs.combine.free,
-              combine_pro: costs.combine.pro,
-          })
+          text: t('imageStudio.subtitle')
       };
   }, [t]);
 
@@ -128,7 +117,7 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
     const files = event.target.files;
     if (!files) return;
 
-    const maxImages = isProUser ? 10 : 3;
+    const maxImages = 10;
     if (stagedImages.length + files.length > maxImages) {
       addErrorMessage(t('imageStudio.errorImageLimit', { max: maxImages }));
       event.target.value = '';
@@ -168,13 +157,6 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
     }
 
     const mode = stagedImages.length === 0 ? 'generate' : stagedImages.length === 1 ? 'edit' : 'combine';
-    const costs = t('imageStudio.cost', {}) as any;
-    const creditCost = isProUser ? costs[mode].pro : costs[mode].free;
-
-    if (user.credits < creditCost) {
-        addErrorMessage(t('imageStudio.errorCredits', { cost: creditCost, userCredits: user.credits }));
-        return;
-    }
 
     setIsLoading(true);
     
@@ -226,7 +208,7 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
         }
       };
       setMessages(prev => [...prev, aiMessage]);
-      spendCredits(creditCost);
+      // no credits deduction
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -258,13 +240,6 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
     if (isLoading) return;
 
     const { mode, prompt: regenPrompt, images: regenImages } = context;
-    const costs = t('imageStudio.cost', {}) as any;
-    const creditCost = isProUser ? costs[mode].pro : costs[mode].free;
-
-    if (user.credits < creditCost) {
-        addErrorMessage(t('imageStudio.errorCredits', { cost: creditCost, userCredits: user.credits }));
-        return;
-    }
 
     setIsLoading(true);
 
@@ -298,7 +273,7 @@ const ImageStudio: React.FC<ImageStudioProps> = ({ onUseImage }) => {
             generationContext: context, // Carry over the same context
         };
         setMessages(prev => [...prev, aiMessage]);
-        spendCredits(creditCost);
+        // no credits deduction
 
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';

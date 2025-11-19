@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import CodeBlock from './CodeBlock';
 import SceneCard from './SceneCard';
 import { StoryboardResult } from '../types';
-import { useUser } from '../contexts/UserContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 
 declare var JSZip: any;
@@ -37,11 +36,9 @@ const CheckIcon: React.FC<{className?: string}> = ({ className }) => (
 
 
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, onImageClick, regeneratingScenes, onRegenerateImage, onScenePromptChange, onReferenceImageUpload }) => {
-  const { user, spendCredits } = useUser();
   const { t } = useLocalization();
   const [finalPromptCopied, setFinalPromptCopied] = useState(false);
-  const isProUser = user.plan === 'pro';
-  const DOWNLOAD_COST = 50;
+  
   
   const handleFinalPromptCopy = () => {
     if (!result?.copyReadyPrompt) return;
@@ -56,13 +53,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, onImageClick, r
         return;
     }
     
-    if (!isProUser) {
-        if (user.credits < DOWNLOAD_COST) {
-            alert(t('storyboard.results.downloadErrorCredits', { DOWNLOAD_COST }));
-            return;
-        }
-        spendCredits(DOWNLOAD_COST);
-    }
+    // no credits deduction
 
     const zip = new JSZip();
     zip.file("prompt.txt", result.copyReadyPrompt);
@@ -123,19 +114,12 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, onImageClick, r
             <div className="relative group">
               <button
                 onClick={handleDownloadAll}
-                disabled={!isProUser && user.credits < DOWNLOAD_COST}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg shadow-md hover:from-purple-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-purple-500 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:from-purple-600 disabled:hover:to-cyan-600"
               >
                 <DownloadIcon className="w-4 h-4" />
-                <span>
-                    {isProUser ? t('storyboard.results.downloadButtonPro') : t('storyboard.results.downloadButtonFree', { DOWNLOAD_COST })}
-                </span>
+                <span>{t('storyboard.results.downloadButtonPro')}</span>
               </button>
-              {!isProUser && user.credits < DOWNLOAD_COST && (
-                <div className="absolute bottom-full right-0 mb-2 w-max px-3 py-2 bg-gray-900 border border-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
-                  {t('storyboard.results.downloadTooltipNoCredits')}
-                </div>
-              )}
+              
             </div>
           </div>
           <div className="mb-3">

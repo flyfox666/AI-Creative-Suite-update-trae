@@ -4,23 +4,22 @@ import StoryboardGenerator from './components/StoryboardGenerator';
 import ImageStudio from './components/ImageStudio';
 import MediaAnalyzer from './components/MediaAnalyzer';
 
-import Pricing from './components/Pricing';
 import Settings from './components/Settings';
 import TabButton from './components/TabButton';
 import { UserProvider } from './contexts/UserContext';
-import UserStatus from './components/UserStatus';
-import ProAccessModal from './components/ProAccessModal';
 import { LocalizationProvider, useLocalization } from './contexts/LocalizationContext';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import HelpModal from './components/HelpModal';
  
 
-type Tab = 'storyboard' | 'image' | 'analyzer' | 'pricing' | 'settings';
+type Tab = 'storyboard' | 'image' | 'analyzer' | 'settings';
 
 const AppContent: React.FC = () => {
   const { t } = useLocalization();
   const [activeTab, setActiveTab] = React.useState<Tab>('storyboard');
   const [storyboardIdea, setStoryboardIdea] = React.useState<string>('');
   const [referenceImage, setReferenceImage] = React.useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = React.useState(false);
 
   const handleUseStoryboardIdea = (idea: string) => {
     setStoryboardIdea(idea);
@@ -39,12 +38,12 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 font-sans p-4 sm:p-6 lg:p-8">
-      <ProAccessModal />
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} onGoSettings={() => { setActiveTab('settings'); setHelpOpen(false); }} />
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-8">
           <div className="flex justify-end items-center gap-4">
             <LanguageSwitcher />
-            <UserStatus />
+            <button onClick={() => setHelpOpen(true)} className="px-3 py-2 text-sm bg-gray-800 border border-gray-700 rounded-lg">{t('header.help')}</button>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-500">
             {t('header.title')}
@@ -71,11 +70,6 @@ const AppContent: React.FC = () => {
             onClick={() => setActiveTab('analyzer')}
           />
           
-           <TabButton
-            label={t('tabs.pricing')}
-            isActive={activeTab === 'pricing'}
-            onClick={() => setActiveTab('pricing')}
-          />
           <TabButton
             label={t('tabs.settings')}
             isActive={activeTab === 'settings'}
@@ -98,10 +92,7 @@ const AppContent: React.FC = () => {
             <MediaAnalyzer onUseIdea={handleUseStoryboardIdea} />
           </div>
           
-          <div className={activeTab === 'pricing' ? '' : 'hidden'}>
-            <Pricing />
-          </div>
-          <div className={activeTab === 'settings' ? '' : 'hidden'}>
+          <div id="settings" className={activeTab === 'settings' ? '' : 'hidden'}>
             <Settings />
           </div>
         </main>

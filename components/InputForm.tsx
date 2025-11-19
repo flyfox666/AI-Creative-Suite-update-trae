@@ -1,5 +1,4 @@
 import React from 'react';
-import ProBadge from './ProBadge';
 import { useLocalization } from '../contexts/LocalizationContext';
 
 type ReferenceImageMode = 'contextual' | 'combine';
@@ -19,7 +18,6 @@ interface InputFormProps {
   onReferenceImageRemove: (url: string) => void;
   onSubmit: () => void;
   isLoading: boolean;
-  isProUser: boolean;
   referenceImageMode: ReferenceImageMode;
   setReferenceImageMode: (mode: ReferenceImageMode) => void;
 }
@@ -53,7 +51,6 @@ const InputForm: React.FC<InputFormProps> = ({
   onReferenceImageRemove,
   onSubmit,
   isLoading,
-  isProUser,
   referenceImageMode,
   setReferenceImageMode,
 }) => {
@@ -72,10 +69,10 @@ const InputForm: React.FC<InputFormProps> = ({
     }
   };
 
-  const maxScenes = isProUser ? 10 : 3;
-  const maxImages = isProUser ? 10 : 3;
+  const maxScenes = 10;
+  const maxImages = 10;
   const canUploadMore = referenceImages.length < maxImages;
-  const combineCost = isProUser ? t('storyboard.form.refImageModeCombineCostPro') : t('storyboard.form.refImageModeCombineCostFree');
+  const combineCost = '';
 
   return (
     <div className="space-y-6">
@@ -134,7 +131,7 @@ const InputForm: React.FC<InputFormProps> = ({
                 {t('storyboard.form.referenceImageLabel')}
             </label>
             <p className="text-sm text-gray-500 mb-1">{t('storyboard.form.referenceImageHint')}</p>
-            {!isProUser && <p className="text-xs text-yellow-400 mb-2">{t('storyboard.form.referenceImageCostHint')}</p>}
+            
             <div className="space-y-2">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                     {referenceImages.map((image) => (
@@ -193,10 +190,10 @@ const InputForm: React.FC<InputFormProps> = ({
                                 className="h-4 w-4 text-purple-600 bg-gray-700 border-gray-500 focus:ring-purple-500"
                                 disabled={isLoading}
                             />
-                            <div className="ml-3 text-sm">
-                                <span className="font-medium text-gray-200">{t('storyboard.form.refImageModeCombineTitle')}</span>
-                                <p className="text-gray-400 text-xs">{t('storyboard.form.refImageModeCombineHint', { cost: combineCost })}</p>
-                            </div>
+                        <div className="ml-3 text-sm">
+                            <span className="font-medium text-gray-200">{t('storyboard.form.refImageModeCombineTitle')}</span>
+                            <p className="text-gray-400 text-xs">{t('storyboard.form.refImageModeCombineHint', { cost: '' })}</p>
+                        </div>
                         </label>
                     </div>
                 </div>
@@ -210,7 +207,7 @@ const InputForm: React.FC<InputFormProps> = ({
                 <label htmlFor="coherence-toggle" className="block text-sm font-medium text-gray-400">
                   {t('storyboard.form.coherenceLabel')}
                 </label>
-                {isProUser ? <ProBadge /> : <span className="text-xs font-bold text-yellow-400">{t('storyboard.form.coherenceCost')}</span>}
+                
             </div>
             <p className="text-xs text-gray-500 mb-2">{t('storyboard.form.coherenceHint')}</p>
             <button
@@ -226,12 +223,7 @@ const InputForm: React.FC<InputFormProps> = ({
                 className={`${isCoherent ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
-            <div className="absolute top-full left-0 mt-2 w-max px-3 py-2 bg-gray-900 border border-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
-                {isProUser
-                ? t('storyboard.form.coherenceTooltipPro')
-                : t('storyboard.form.coherenceTooltipFree')
-                }
-            </div>
+            
         </div>
         <div>
             <label className="block text-sm font-medium text-gray-400">

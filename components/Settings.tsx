@@ -5,7 +5,7 @@ import { generateImage } from '../services/aiService'
 
 const Settings: React.FC = () => {
   const { t } = useLocalization()
-  const [provider, setProvider] = useState('')
+  const [provider, setProvider] = useState('ark')
   const [geminiKey, setGeminiKey] = useState('')
   const [arkKey, setArkKey] = useState('')
   const [arkBase, setArkBase] = useState('')
@@ -44,11 +44,11 @@ const Settings: React.FC = () => {
 
 
 
-  const [unlimited, setUnlimited] = useState(false)
+  
 
   useEffect(() => {
     try {
-      setProvider(window.localStorage.getItem('settings.AI_PROVIDER') || '')
+      setProvider(window.localStorage.getItem('settings.AI_PROVIDER') || 'ark')
       setGeminiKey(window.localStorage.getItem('settings.GEMINI_API_KEY') || '')
       setArkKey(window.localStorage.getItem('settings.ARK_API_KEY') || '')
       setArkBase(window.localStorage.getItem('settings.ARK_BASE_URL') || '')
@@ -86,7 +86,7 @@ const Settings: React.FC = () => {
 
 
 
-      setUnlimited((window.localStorage.getItem('settings.UNLIMITED_CREDITS') || '') === 'true')
+      
 
       setCoherenceStrength(window.localStorage.getItem('settings.COHERENCE_STRENGTH') || 'strong')
       setUseFilesApiForMedia(window.localStorage.getItem('settings.USE_FILES_API_FOR_MEDIA') || 'auto')
@@ -119,7 +119,7 @@ const Settings: React.FC = () => {
       'settings.MODEL_VISION': provider === 'gemini' ? (geminiVisionPreset === 'custom' ? geminiVisionCustom : geminiVisionPreset) : (arkVisionPreset === 'custom' ? arkVisionCustom : arkVisionPreset || modelVision),
       'settings.MODEL_VIDEO': provider === 'gemini' ? (geminiVideoPreset === 'custom' ? geminiVideoCustom : geminiVideoPreset) : (arkVideoPreset === 'custom' ? arkVideoCustom : arkVideoPreset || modelVideo),
       'settings.VIDEO_MAX_TOKENS': videoMaxTokens,
-      'settings.UNLIMITED_CREDITS': String(unlimited),
+      
       'settings.REPLY_LANGUAGE': replyLanguage || 'auto',
       'settings.IMAGE_SIZE_PRESET': imageSizePreset || '2K',
       'settings.IMAGE_WATERMARK': String(imageWatermark),
@@ -389,13 +389,7 @@ const Settings: React.FC = () => {
         </div
 >
       </div>
-      <div className="mt-4">
-        <label className="inline-flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={unlimited} onChange={e => setUnlimited(e.target.checked)} />
-          <span>{t('settings.unlimitedCredits')}</span>
-        </label>
-        <p className="text-xs text-gray-500 mt-1">{t('settings.unlimitedCreditsHint')}</p>
-      </div>
+      
       <div className="mt-6">
         <button onClick={handleSave} className="px-6 py-3 font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg">{t('settings.save')}</button>
       </div>

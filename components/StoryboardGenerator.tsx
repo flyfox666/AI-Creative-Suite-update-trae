@@ -6,7 +6,6 @@ import ResultsDisplay from './ResultsDisplay';
 import ImageModal from './ImageModal';
 import { fileToBase64 } from '../utils/fileUtils';
 import * as spinnerLoaders from 'react-loader-spinner';
-import { useUser } from '../contexts/UserContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 
 const Dna = (spinnerLoaders as any).Dna;
@@ -20,7 +19,6 @@ interface StoryboardGeneratorProps {
 type ReferenceImageMode = 'contextual' | 'combine';
 
 const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, initialImage, onInitialDataUsed }) => {
-  const { user, spendCredits } = useUser();
   const { t } = useLocalization();
   const [userInput, setUserInput] = useState<string>('');
   const [duration, setDuration] = useState<string>('15');
@@ -35,7 +33,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
   const [referenceImages, setReferenceImages] = useState<{url: string, base64: string, mimeType: string}[]>([]);
   const [referenceImageMode, setReferenceImageMode] = useState<ReferenceImageMode>('contextual');
 
-  const isProUser = user.plan === 'pro';
+  const isProUser = true;
 
   useEffect(() => {
     if (initialIdea) {
@@ -52,7 +50,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
             const base64 = match[2];
             setReferenceImages(prev => {
                 if (prev.some(img => img.url === initialImage)) return prev;
-                const maxImages = isProUser ? 10 : 3;
+                const maxImages = 10;
                 const newImage = { url: initialImage, base64, mimeType };
                 const updatedImages = [...prev, newImage];
                 // Slice to respect the limit if it's exceeded, keeping the newest ones
@@ -64,7 +62,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
   }, [initialImage, onInitialDataUsed, isProUser]);
 
   const handleReferenceImageAdd = async (files: FileList) => {
-    const maxImages = isProUser ? 10 : 3;
+    const maxImages = 10;
     const currentCount = referenceImages.length;
     const filesToAdd = Array.from(files);
 
@@ -106,30 +104,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
         return;
     }
 
-    // Credit Check
-    let creditCostPerScene = isProUser ? 8 : 10;
-    if (!isProUser && isCoherent) {
-        creditCostPerScene = 15; // Higher cost for free users with coherence
-    }
-    const storyboardCost = parsedSceneCount * creditCostPerScene;
-    
-    const EXTRA_IMAGE_COST = 5;
-    let imageCost = 0;
-    if (!isProUser && referenceImages.length > 1) {
-        imageCost = (referenceImages.length - 1) * EXTRA_IMAGE_COST;
-    }
-    
-    let combineCost = 0;
-    if (referenceImageMode === 'combine' && referenceImages.length > 1) {
-        combineCost = isProUser ? 20 : 40;
-    }
-
-    const totalCreditCost = storyboardCost + imageCost + combineCost;
-    
-    if (user.credits < totalCreditCost) {
-        setError(t('storyboard.generator.errorNotEnoughCredits', { totalCreditCost, userCredits: user.credits }));
-        return;
-    }
+    // no credit checks
 
     setIsLoading(true);
     setError(null);
@@ -158,7 +133,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
       }
 
       const result = await generateStoryboardAndImages(userInput, parsedDuration, parsedSceneCount, isCoherent, aspectRatio, finalReferenceImages);
-      spendCredits(totalCreditCost);
+      // no credits deduction
       setStoryboardResult(result);
     } catch (err) {
       console.error(err);
@@ -166,7 +141,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
     } finally {
       setIsLoading(false);
     }
-  }, [userInput, duration, sceneCount, isCoherent, aspectRatio, referenceImages, referenceImageMode, user, spendCredits, isProUser, t]);
+  }, [userInput, duration, sceneCount, isCoherent, aspectRatio, referenceImages, referenceImageMode, t]);
 
   const handleImageClick = (url: string, sceneNumber: number) => {
     if (url) {
@@ -195,15 +170,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
   const handleRegenerateImage = async (index: number) => {
     if (!storyboardResult) return;
     
-    let creditCost = isProUser ? 8 : 10;
-    if (!isProUser && isCoherent) {
-        creditCost = 15;
-    }
-
-    if (user.credits < creditCost) {
-        setError(t('storyboard.generator.errorRegenCredits', { creditCost }));
-        return;
-    }
+    // no credit checks
 
     setRegeneratingScenes(prev => new Set(prev).add(index));
     setError(null);
@@ -213,7 +180,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
         const previousImageUrl = (isCoherent && index > 0) ? storyboardResult.scenes[index - 1].imageUrl : undefined;
         
         const newImageUrl = await generateImageForScene(scene.fullPrompt, previousImageUrl, aspectRatio);
-        spendCredits(creditCost);
+        // no credits deduction
         
         const newScenes = [...storyboardResult.scenes];
         newScenes[index] = { ...newScenes[index], imageUrl: newImageUrl };
@@ -283,7 +250,6 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
           onReferenceImageRemove={handleReferenceImageRemove}
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          isProUser={isProUser}
           referenceImageMode={referenceImageMode}
           setReferenceImageMode={setReferenceImageMode}
         />
