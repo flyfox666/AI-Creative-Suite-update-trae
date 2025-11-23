@@ -5,10 +5,8 @@ import InputForm from './InputForm';
 import ResultsDisplay from './ResultsDisplay';
 import ImageModal from './ImageModal';
 import { fileToBase64 } from '../utils/fileUtils';
-import * as spinnerLoaders from 'react-loader-spinner';
 import { useLocalization } from '../contexts/LocalizationContext';
 
-const Dna = (spinnerLoaders as any).Dna;
 
 interface StoryboardGeneratorProps {
   initialIdea?: string;
@@ -257,18 +255,7 @@ const StoryboardGenerator: React.FC<StoryboardGeneratorProps> = ({ initialIdea, 
 
       {isLoading && (
         <div className="mt-8 flex flex-col items-center justify-center text-center">
-          {Dna ? (
-            <Dna
-              visible={true}
-              height="120"
-              width="120"
-              ariaLabel="dna-loading"
-              wrapperStyle={{}}
-              wrapperClass="dna-wrapper"
-            />
-          ) : (
-            <div className="p-4 text-lg text-gray-400">{t('common.loading')}</div>
-          )}
+          <div className="h-12 w-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" aria-label="loading"></div>
           <p className="mt-4 text-lg text-gray-300 animate-pulse">{t('storyboard.generator.loadingMessage')}</p>
         </div>
       )}

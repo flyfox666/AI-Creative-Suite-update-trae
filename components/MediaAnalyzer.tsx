@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { analyzeImage, analyzeVideo, uploadMediaDebug, uploadMediaWithStatus } from '../services/aiService';
 import { getProvider } from '../services/runtimeConfig';
 import { fileToBase64 } from '../utils/fileUtils';
-import { Oval } from 'react-loader-spinner';
 import CodeBlock from './CodeBlock';
 import { useLocalization } from '../contexts/LocalizationContext';
 
@@ -300,7 +299,7 @@ const MediaAnalyzer: React.FC<MediaAnalyzerProps> = ({ onUseIdea }) => {
 
             {isLoading && (
                 <div className="flex justify-center items-center gap-4 text-lg text-gray-300">
-                    <Oval height="40" width="40" color="#a855f7" secondaryColor="#67e8f9" strokeWidth={3} />
+                    <div className="h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" aria-label="loading"></div>
                     <span>{t('mediaAnalyzer.loading')}</span>
                 </div>
             )}

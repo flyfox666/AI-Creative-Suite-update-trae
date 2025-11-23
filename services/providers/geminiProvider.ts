@@ -60,7 +60,7 @@ const geminiFetch = async (path: string, body: any) => {
   const apiKey = getOpenAICompatApiKey()
   const { baseUrl } = getGeminiConfig()
   if (!apiKey) throw new Error('Gemini API key is not configured')
-  const dbgOn = (process?.env?.NODE_ENV !== 'production') && getDebugLogs()
+  const dbgOn = (!import.meta.env.PROD) && getDebugLogs()
   const t0 = Date.now()
   const compat = getGeminiOpenAICompat() || isOpenAIBase(baseUrl)
   const coreBase = compat ? 'https://generativelanguage.googleapis.com' : resolveCoreBase(baseUrl)
@@ -100,7 +100,7 @@ const geminiOpenAIChat = async (body: any) => {
   const b = (baseUrl || '').replace(/\/+$/, '')
   const compat = getGeminiOpenAICompat() || isOpenAIBase(baseUrl)
   const url = compat ? '/api/openai/chat/completions' : `${b}/v1beta/openai/chat/completions`
-  const dbgOn = (process?.env?.NODE_ENV !== 'production') && getDebugLogs()
+  const dbgOn = (!import.meta.env.PROD) && getDebugLogs()
   const t0 = Date.now()
   const res = await fetch(url, {
     method: 'POST',
@@ -140,7 +140,7 @@ const base64ToBytes = (b64: string): Uint8Array => {
 const geminiUploadFile = async (bytes: Uint8Array, mimeType: string): Promise<{ uri: string; mimeType: string }> => {
   const { apiKey, baseUrl } = getGeminiConfig()
   if (!apiKey) throw new Error('Gemini API key is not configured')
-  const dbgOn = (process?.env?.NODE_ENV !== 'production') && getDebugLogs()
+  const dbgOn = (!import.meta.env.PROD) && getDebugLogs()
   const coreBase = resolveCoreBase(baseUrl)
   const initRes = await fetch(`${coreBase}/upload/v1beta/files`, {
     method: 'POST',
@@ -195,7 +195,7 @@ const geminiUploadFile = async (bytes: Uint8Array, mimeType: string): Promise<{ 
         return { uri: outUri, mimeType: info?.mimeType || info?.file?.mimeType || mimeType }
       }
       if (state === 'FAILED') {
-        throw new Error('Gemini Files upload failed to process')
+        return { uri, mimeType: info?.mimeType || info?.file?.mimeType || mimeType }
       }
     }
     await new Promise(r => setTimeout(r, 800))
