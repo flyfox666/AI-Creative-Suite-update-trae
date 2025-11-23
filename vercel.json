@@ -1,5 +1,9 @@
 {
   "builds": [
     { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
+  ],
+  "rewrites": [
+    { "source": "/api/openai/(.*)", "destination": "https://vibecodingapi.ai/v1/$1" },
+    { "source": "/arkapi/(.*)", "destination": "https://ark.cn-beijing.volces.com/$1" }
   ]
 }
