@@ -28,6 +28,8 @@ export default defineConfig(({ mode }) => {
       plugins: [react()],
       define: {
         'process.env': '{}',
+        'process.env.NODE_ENV': JSON.stringify('production'),
+        'process': '({ env: { NODE_ENV: "production" } })',
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_BASE_URL': JSON.stringify(env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com'),
