@@ -278,6 +278,10 @@
     "fetchImageAsBase64": "代理抓取图片为 Base64"
     ,
     "openaiCompatApiKey": "OpenAI 兼容 API 密钥（第三方）"
+    ,
+    "geminiImageHealthCheckNative": "Gemini 原生图像健康检查"
+    ,
+    "openaiImageHealthCheck": "OpenAI 兼容图像健康检查"
   },
   "header.help": "帮助",
   "settings.unlimitedCredits": "无限积分（测试）",

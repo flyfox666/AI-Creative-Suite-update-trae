@@ -78,10 +78,10 @@ const Settings: React.FC = () => {
         presetSetter(p)
         if (p === 'custom') customSetter(value)
       }
-      setPair(setGeminiChatPreset, setGeminiChatCustom, cv, ['gemini-2.5-pro','gemini-2.5-flash','gemini-flash-lite-latest'])
-      setPair(setGeminiImagePreset, setGeminiImageCustom, iv, ['gemini-2.5-flash-image'])
-      setPair(setGeminiVisionPreset, setGeminiVisionCustom, vv, ['gemini-2.5-pro','gemini-2.5-flash'])
-      setPair(setGeminiVideoPreset, setGeminiVideoCustom, dv, ['gemini-2.5-flash','gemini-2.5-pro'])
+      setPair(setGeminiChatPreset, setGeminiChatCustom, cv, ['gemini-2.5-pro','gemini-2.5-flash','gemini-flash-lite-latest','gemini-3-pro-preview'])
+      setPair(setGeminiImagePreset, setGeminiImageCustom, iv, ['gemini-2.5-flash-image','gemini-3-pro-image-preview'])
+      setPair(setGeminiVisionPreset, setGeminiVisionCustom, vv, ['gemini-2.5-pro','gemini-2.5-flash','gemini-3-pro-preview'])
+      setPair(setGeminiVideoPreset, setGeminiVideoCustom, dv, ['gemini-2.5-flash','gemini-2.5-pro','gemini-3-pro-preview'])
 
       setPair(setArkChatPreset, setArkChatCustom, cv, ['doubao-1-5-pro-32k-250115','doubao-seed-1-6-lite-251015','doubao-seed-1-6-251015','doubao-seed-1-6-flash-250828'])
       if (!cv) setArkChatPreset('doubao-1-5-pro-32k-250115')
@@ -109,8 +109,8 @@ const Settings: React.FC = () => {
         return
       }
       const imgModel = geminiImagePreset === 'custom' ? geminiImageCustom : geminiImagePreset
-      if (!imgModel || !/image|flash-image/i.test(imgModel)) {
-        alert('Gemini 图片模型无效，请选择或填写支持图片生成的模型（如 gemini-2.5-flash-image）')
+      if (!imgModel) {
+        alert('请填写图片模型 ID')
         return
       }
     }
@@ -215,6 +215,7 @@ const Settings: React.FC = () => {
                 <option value="gemini-2.5-pro">gemini-2.5-pro</option>
                 <option value="gemini-2.5-flash">gemini-2.5-flash</option>
                 <option value="gemini-flash-lite-latest">gemini-flash-lite-latest</option>
+                <option value="gemini-3-pro-preview">gemini-3-pro-preview</option>
                 <option value="custom">Custom...</option>
               </select>
               {geminiChatPreset === 'custom' && (
@@ -225,6 +226,7 @@ const Settings: React.FC = () => {
               <label className="block text-sm mb-1">{t('settings.modelImage')}</label>
               <select value={geminiImagePreset} onChange={e => setGeminiImagePreset(e.target.value)} className="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg text-gray-200">
                 <option value="gemini-2.5-flash-image">gemini-2.5-flash-image</option>
+                <option value="gemini-3-pro-image-preview">gemini-3-pro-image-preview</option>
                 <option value="custom">Custom...</option>
               </select>
               {geminiImagePreset === 'custom' && (
@@ -236,6 +238,7 @@ const Settings: React.FC = () => {
               <select value={geminiVisionPreset} onChange={e => setGeminiVisionPreset(e.target.value)} className="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg text-gray-200">
                 <option value="gemini-2.5-pro">gemini-2.5-pro</option>
                 <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                <option value="gemini-3-pro-preview">gemini-3-pro-preview</option>
                 <option value="custom">Custom...</option>
               </select>
               {geminiVisionPreset === 'custom' && (
@@ -247,6 +250,7 @@ const Settings: React.FC = () => {
               <select value={geminiVideoPreset} onChange={e => setGeminiVideoPreset(e.target.value)} className="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg text-gray-200">
                 <option value="gemini-2.5-flash">gemini-2.5-flash</option>
                 <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                <option value="gemini-3-pro-preview">gemini-3-pro-preview</option>
                 <option value="custom">Custom...</option>
               </select>
               {geminiVideoPreset === 'custom' && (
@@ -278,13 +282,39 @@ const Settings: React.FC = () => {
             <div>
               <button onClick={async () => {
                 try {
-                  const url = await generateImage('Health check: generate a simple colorful geometric image')
-                  alert('Gemini 图片生成连通性正常')
+                  const prompt = 'Health check: generate a simple colorful geometric image'
+                  const base = geminiBase || 'https://generativelanguage.googleapis.com'
+                  const model = (geminiImagePreset === 'custom' ? geminiImageCustom : geminiImagePreset) || 'gemini-2.5-flash-image'
+                  const res = await fetch(`${base}/v1beta/models/${model}:generateContent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiKey },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                  })
+                  if (!res.ok) throw new Error(await res.text())
+                  alert(t('settings.geminiImageHealthCheckNative') + ' OK')
                 } catch (err) {
                   const msg = err instanceof Error ? err.message : 'Unknown error'
-                  alert(`Gemini 图片生成连通性失败：${msg}`)
+                  alert(`${t('settings.geminiImageHealthCheckNative')} FAIL：${msg}`)
                 }
-              }} className="mt-2 px-4 py-2 font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg">Gemini 图像健康检查</button>
+              }} className="mt-2 px-4 py-2 font-semibold text白 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg">{t('settings.geminiImageHealthCheckNative')}</button>
+              {geminiOpenAICompat && (
+                <button onClick={async () => {
+                  try {
+                    const prompt = 'Health check: generate a simple colorful geometric image'
+                    const model = (geminiImagePreset === 'custom' ? geminiImageCustom : geminiImagePreset) || 'nano-banana-vip'
+                    const res = await fetch('/api/openai/images/generations', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${openaiCompatKey}` },
+                      body: JSON.stringify({ model, prompt, n: 1, size: '1024x1024' })
+                    })
+                    if (!res.ok) throw new Error(await res.text())
+                    alert(t('settings.openaiImageHealthCheck') + ' OK')
+                  } catch (err) {
+                    const msg = err instanceof Error ? err.message : 'Unknown error'
+                    alert(`${t('settings.openaiImageHealthCheck')} FAIL：${msg}`)
+                  }
+                }} className="mt-2 ml-2 px-4 py-2 font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg">{t('settings.openaiImageHealthCheck')}</button>
+              )}
             </div>
             <div>
               <button onClick={async () => {

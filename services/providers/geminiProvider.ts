@@ -248,7 +248,7 @@ const extractText = (json: any): string => {
 export const GeminiProvider: AIProvider = {
   async generateImageForScene(prompt: string, previousImageUrl: string | undefined, aspectRatio: string): Promise<string> {
     const models = getModelConfig()
-    const model = (models.image && /image|flash-image/i.test(models.image)) ? models.image : 'gemini-2.5-flash-image'
+    const model = models.image || 'gemini-2.5-flash-image'
     const langPref = getReplyLanguage()
     const isZh = langPref === 'zh'
     const strictPrefix = isZh
@@ -337,7 +337,7 @@ ${isChinese ? '每个场景包含主体、环境、光照、风格、动作提�
 
   async combineImages(images: { base64: string; mimeType: string }[], prompt: string): Promise<{ base64: string; mimeType: string }> {
     const models = getModelConfig()
-    const model = (models.image && /image|flash-image/i.test(models.image)) ? models.image : 'gemini-2.5-flash-image'
+    const model = models.image || 'gemini-2.5-flash-image'
     const parts: any[] = [{ text: prompt }]
     for (const img of images) {
       const bytes = base64ToBytes(img.base64)
@@ -370,7 +370,7 @@ ${isChinese ? '每个场景包含主体、环境、光照、风格、动作提�
 
   async generateImage(prompt: string): Promise<string> {
     const models = getModelConfig()
-    const model = (models.image && /image|flash-image/i.test(models.image)) ? models.image : 'gemini-2.5-flash-image'
+    const model = models.image || 'gemini-2.5-flash-image'
     const { baseUrl } = getGeminiConfig()
     if (getGeminiOpenAICompat() || isOpenAIBase(baseUrl)) {
       return openAIImageGenerate(prompt, '16:9', model)

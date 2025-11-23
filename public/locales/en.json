@@ -282,6 +282,10 @@
     "fetchImageAsBase64": "Proxy-fetch image as Base64"
     ,
     "openaiCompatApiKey": "OpenAI-compatible API Key (third-party)"
+    ,
+    "geminiImageHealthCheckNative": "Gemini Native Image Health Check"
+    ,
+    "openaiImageHealthCheck": "OpenAI-compatible Image Health Check"
   },
   "settings.unlimitedCredits": "Unlimited credits (testing)",
   "settings.unlimitedCreditsHint": "When enabled, credits won't be deducted and checks are bypassed."
