@@ -17,7 +17,7 @@ const getNestedTranslation = (obj: any, key: string): any | undefined => {
 };
 
 export const LocalizationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [locale, setLocale] = useState<Locale>('en');
+    const [locale, setLocale] = useState<Locale>('zh');
     const [translations, setTranslations] = useState<Translations | null>(null);
 
     useEffect(() => {
