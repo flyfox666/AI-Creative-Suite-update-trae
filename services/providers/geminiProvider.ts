@@ -61,8 +61,8 @@ const geminiFetch = async (path: string, body: any) => {
   if (!apiKey) throw new Error('Gemini API key is not configured')
   const dbgOn = (!import.meta.env.PROD) && getDebugLogs()
   const t0 = Date.now()
-  const compat = getGeminiOpenAICompat() || isOpenAIBase(baseUrl)
-  const coreBase = compat ? 'https://generativelanguage.googleapis.com' : resolveCoreBase(baseUrl)
+  const compat = getGeminiOpenAICompat()
+  const coreBase = resolveCoreBase(baseUrl)
   const res = await fetch(`${coreBase}${path}`, {
     method: 'POST',
     headers: {
@@ -95,9 +95,8 @@ const geminiFetch = async (path: string, body: any) => {
 
 const geminiOpenAIChat = async (body: any) => {
   const { apiKey: geminiKey, baseUrl } = getGeminiConfig()
-  if (!geminiKey) throw new Error('Gemini API key is not configured')
   const b = (baseUrl || '').replace(/\/+$/, '')
-  const compat = getGeminiOpenAICompat() || isOpenAIBase(baseUrl)
+  const compat = getGeminiOpenAICompat()
   const url = compat ? '/api/openai/chat/completions' : `${b}/v1beta/openai/chat/completions`
   const dbgOn = (!import.meta.env.PROD) && getDebugLogs()
   const t0 = Date.now()
@@ -106,8 +105,15 @@ const geminiOpenAIChat = async (body: any) => {
     headers: {
       'Content-Type': 'application/json',
       ...(compat
-        ? { 'Authorization': `Bearer ${getOpenAICompatApiKey()}` }
-        : { 'x-goog-api-key': geminiKey }
+        ? (() => {
+            const key = getOpenAICompatApiKey()
+            if (!key) throw new Error('OpenAI-compatible API key is not configured')
+            return { 'Authorization': `Bearer ${key}` }
+          })()
+        : (() => {
+            if (!geminiKey) throw new Error('Gemini API key is not configured')
+            return { 'x-goog-api-key': geminiKey }
+          })()
       ),
     },
     body: JSON.stringify(body),
