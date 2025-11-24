@@ -33,16 +33,8 @@ export const getOpenAICompatApiKey = (): string => {
 }
 
 export const getArkConfig = () => {
-  const isLocal = typeof window !== 'undefined' && (
-    /localhost|127\.0\.0\.1/.test(window.location.hostname) ||
-    /^10\./.test(window.location.hostname) ||
-    /^192\.168\./.test(window.location.hostname) ||
-    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(window.location.hostname)
-  )
   const apiKey = get('settings.ARK_API_KEY', process.env.ARK_API_KEY || '')
-  const baseUrl = isLocal
-    ? '/arkapi/api/v3'
-    : get('settings.ARK_BASE_URL', process.env.ARK_BASE_URL || 'https://ark.cn-beijing.volces.com/api/v3')
+  const baseUrl = get('settings.ARK_BASE_URL', '') || '/arkapi/api/v3'
   return { apiKey, baseUrl }
 }
 
