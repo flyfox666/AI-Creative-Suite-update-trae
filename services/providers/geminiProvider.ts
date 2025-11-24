@@ -97,41 +97,62 @@ const geminiOpenAIChat = async (body: any) => {
   const { apiKey: geminiKey, baseUrl } = getGeminiConfig()
   const b = (baseUrl || '').replace(/\/+$/, '')
   const compat = getGeminiOpenAICompat()
-  const url = compat ? '/api/openai/chat/completions' : `${b}/v1beta/openai/chat/completions`
   const dbgOn = (!import.meta.env.PROD) && getDebugLogs()
   const t0 = Date.now()
+  if (compat) {
+    const url = '/api/openai/chat/completions'
+    const key = getOpenAICompatApiKey()
+    if (!key) throw new Error('OpenAI-compatible API key is not configured')
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const text = await res.text()
+      if (dbgOn) console.log('[OpenAIChatError]', res.status, Date.now() - t0, text.slice(0, 1000))
+      try {
+        const j = JSON.parse(text)
+        const msg = j?.error?.message || j?.message || text
+        throw new Error(`Gemini OpenAI chat error ${res.status}: ${msg}`)
+      } catch {
+        throw new Error(`Gemini OpenAI chat error ${res.status}: ${text}`)
+      }
+    }
+    const j = await res.json()
+    if (dbgOn) console.log('[OpenAIChatOK]', res.status, Date.now() - t0, JSON.stringify(j).slice(0, 1000))
+    return j
+  }
+  // Native Gemini path: generateContent with x-goog-api-key
+  if (!geminiKey) throw new Error('Gemini API key is not configured')
+  const model = String(body?.model || 'gemini-3-pro-preview')
+  const messages = Array.isArray(body?.messages) ? body.messages : []
+  // Merge system + user messages into a single contents structure
+  const sys = messages.filter((m: any) => m?.role === 'system').map((m: any) => String(m?.content || '')).join('\n').trim()
+  const usr = messages.filter((m: any) => m?.role === 'user').map((m: any) => String(m?.content || '')).join('\n').trim()
+  const merged = [sys, usr].filter(Boolean).join('\n\n') || String(body?.prompt || '')
+  const url = `${b}/v1beta/models/${encodeURIComponent(model)}:generateContent`
   const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(compat
-        ? (() => {
-            const key = getOpenAICompatApiKey()
-            if (!key) throw new Error('OpenAI-compatible API key is not configured')
-            return { 'Authorization': `Bearer ${key}` }
-          })()
-        : (() => {
-            if (!geminiKey) throw new Error('Gemini API key is not configured')
-            return { 'x-goog-api-key': geminiKey }
-          })()
-      ),
-    },
-    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiKey },
+    body: JSON.stringify({ contents: [{ parts: [{ text: merged }] }] }),
   })
+  const text = await res.text()
   if (!res.ok) {
-    const text = await res.text()
-    if (dbgOn) console.log('[GeminiChatError]', res.status, Date.now() - t0, text.slice(0, 1000))
+    if (dbgOn) console.log('[GeminiGenerateError]', res.status, Date.now() - t0, text.slice(0, 1000))
     try {
       const j = JSON.parse(text)
       const msg = j?.error?.message || j?.message || text
-      throw new Error(`Gemini OpenAI chat error ${res.status}: ${msg}`)
+      throw new Error(`Gemini generateContent error ${res.status}: ${msg}`)
     } catch {
-      throw new Error(`Gemini OpenAI chat error ${res.status}: ${text}`)
+      throw new Error(`Gemini generateContent error ${res.status}: ${text}`)
     }
   }
-  const j = await res.json()
-  if (dbgOn) console.log('[GeminiChatOK]', res.status, Date.now() - t0, JSON.stringify(j).slice(0, 1000))
-  return j
+  let j: any = {}
+  try { j = JSON.parse(text) } catch {}
+  const contentText = extractText(j)
+  // Return in OpenAI-like shape for upstream parser
+  return { choices: [{ message: { content: contentText } }] }
 }
 
 const base64ToBytes = (b64: string): Uint8Array => {
