@@ -57,8 +57,7 @@ const openAIImageGenerate = async (prompt: string, aspectRatio: string, model: s
 }
 
 const geminiFetch = async (path: string, body: any) => {
-  const apiKey = getOpenAICompatApiKey()
-  const { baseUrl } = getGeminiConfig()
+  const { apiKey, baseUrl } = getGeminiConfig()
   if (!apiKey) throw new Error('Gemini API key is not configured')
   const dbgOn = (!import.meta.env.PROD) && getDebugLogs()
   const t0 = Date.now()
@@ -95,8 +94,8 @@ const geminiFetch = async (path: string, body: any) => {
 }
 
 const geminiOpenAIChat = async (body: any) => {
-  const { apiKey, baseUrl } = getGeminiConfig()
-  if (!apiKey) throw new Error('Gemini API key is not configured')
+  const { apiKey: geminiKey, baseUrl } = getGeminiConfig()
+  if (!geminiKey) throw new Error('Gemini API key is not configured')
   const b = (baseUrl || '').replace(/\/+$/, '')
   const compat = getGeminiOpenAICompat() || isOpenAIBase(baseUrl)
   const url = compat ? '/api/openai/chat/completions' : `${b}/v1beta/openai/chat/completions`
@@ -106,7 +105,10 @@ const geminiOpenAIChat = async (body: any) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      ...(compat
+        ? { 'Authorization': `Bearer ${getOpenAICompatApiKey()}` }
+        : { 'x-goog-api-key': geminiKey }
+      ),
     },
     body: JSON.stringify(body),
   })
